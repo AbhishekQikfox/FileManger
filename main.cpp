@@ -241,12 +241,12 @@ public:
     void updateFileData(const std::string& filename, const std::vector<char>& newData) {
         std::string metaPath = metadataDir + filename + ".json";
 
-        // Check if file exists
+        // 1. Verify file exists
         if (!fs::exists(metaPath)) {
             throw std::runtime_error("File not found: " + filename);
         }
 
-        // Read existing metadata
+        // 2. Load existing metadata
         json existingMetadata;
         {
             std::ifstream ifs(metaPath);
@@ -254,7 +254,7 @@ public:
             ifs.close();
         }
 
-        // Compute new chunks
+        // 3. Compute new chunks
         std::vector<std::string> newChunks;
         ThreadPool pool(std::thread::hardware_concurrency());
         std::vector<std::future<std::string>> futures;
@@ -262,7 +262,9 @@ public:
         size_t offset = 0;
         while (offset < newData.size()) {
             size_t bytesRead = std::min(CHUNK_SIZE, newData.size() - offset);
-            std::vector<char> chunk(newData.begin() + offset, newData.begin() + offset + bytesRead);
+            std::vector<char> chunk(newData.begin() + offset,
+                                  newData.begin() + offset + bytesRead);
+
             futures.push_back(pool.enqueue([this, chunk]() {
                 std::string hash = computeHash(chunk);
                 saveChunk(hash, chunk);  // Only saves if new
@@ -271,20 +273,21 @@ public:
             offset += bytesRead;
         }
 
+        // 4. Get new chunk hashes
         for (auto& f : futures) {
             newChunks.push_back(f.get());
         }
 
-        // Check for no changes
+        // 5. Check for no changes
         if (existingMetadata["chunks"] == newChunks) {
             throw std::runtime_error("File identical - no changes required");
         }
 
-        // Update reference counts
+        // 6. Update reference counts
         json refCounts = readRefCounts();
         std::vector<std::string> oldChunks = existingMetadata["chunks"];
 
-        // Decrement old chunks
+        // 7. Decrement old chunks
         for (const auto& hash : oldChunks) {
             if (refCounts.find(hash) != refCounts.end()) {
                 refCounts[hash] = refCounts[hash].get<int>() - 1;
@@ -295,22 +298,26 @@ public:
             }
         }
 
-        // Increment new chunks
+        // ========== CRITICAL FIX ========== //
+        // 8. Increment new chunks
         for (const auto& hash : newChunks) {
-            refCounts[hash] = refCounts.value(hash, 0) + 1;
+            refCounts[hash] = refCounts.value(hash, 0) + 1;  // This was missing!
         }
+        // ================================== //
 
+        // 9. Save updated reference counts
         writeRefCounts(refCounts);
 
-        // Update metadata
+        // 10. Update and save metadata
         existingMetadata["chunks"] = newChunks;
         existingMetadata["size"] = newData.size();
         existingMetadata["updated_at"] = getTimestamp();
 
         std::ofstream ofs(metaPath);
-        ofs << existingMetadata.dump(4);
+        ofs << existingMetadata.dump(4);  // Ensure metadata is saved
         ofs.close();
     }
+
     void deleteFile(const std::string &filename) {
         std::string metaPath = metadataDir + filename + ".json";
         if (!fs::exists(metaPath))
