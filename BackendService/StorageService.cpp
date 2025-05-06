@@ -12,292 +12,247 @@
 #include <nlohmann/json.hpp>
 #include <thread>
 #include <atomic>
-// Add OpenSSL headers for base64 decoding
+#include <mutex>
+#include <condition_variable>
+
+// OpenSSL headers for base64 decoding
 #include <openssl/bio.h>
 #include <openssl/evp.h>
 #include <openssl/buffer.h>
-#include "httplib.h" // Add httplib for HTTP server
+
+#include "httplib.h" // HTTP server
 
 namespace fs = std::filesystem;
 using json = nlohmann::json;
 
-const std::string DB_DIR = "C:\\Users\\Training\\Desktop\\ProjectRoot\\BackendService";
-const std::string DB_PATH = DB_DIR + "\\chunks.db";
-const std::string CHUNK_DIR = "C:\\Users\\Training\\Desktop\\ProjectRoot\\BackendService\\Chunks";
-const int HTTP_PORT = 8081; // Port for the HTTP server
+const std::string DB_DIR   = "C:\\Users\\Training\\Desktop\\ProjectRoot\\BackendService";
+const std::string DB_PATH  = DB_DIR + "\\chunks.db";
+const std::string CHUNK_DIR= DB_DIR + "\\Chunks";
+const int HTTP_PORT        = 8081; // Port for the HTTP server
 
-SERVICE_STATUS serviceStatus;
-SERVICE_STATUS_HANDLE serviceStatusHandle;
-std::atomic<bool> running(false);
+SERVICE_STATUS            serviceStatus;
+SERVICE_STATUS_HANDLE     serviceStatusHandle;
+std::atomic<bool>         running(false);
 
-// Server mutex and condition variable
-std::mutex serverMutex;
-std::condition_variable serverCV;
-httplib::Server* serverPtr = nullptr;
+// For coordinating server startup/shutdown
+std::mutex                serverMutex;
+std::condition_variable   serverCV;
+httplib::Server*          serverPtr = nullptr;
 
-// Proper base64 decoder using OpenSSL
-std::vector<char> base64_decode(const std::string& input) {
-    BIO* b64 = BIO_new(BIO_f_base64());
-    BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL); // Same flag as in encoding
-    
-    BIO* bmem = BIO_new_mem_buf(input.c_str(), static_cast<int>(input.length()));
-    bmem = BIO_push(b64, bmem);
-    
-    std::vector<char> buffer(input.size()); // Should be large enough for the decoded data
-    int decodedSize = BIO_read(bmem, buffer.data(), static_cast<int>(buffer.size()));
-    
-    BIO_free_all(bmem);
-    
-    if (decodedSize > 0) {
-        buffer.resize(decodedSize); // Adjust to actual size
-        return buffer;
-    }
-    
-    return std::vector<char>(); // Return empty vector on error
-}
-
+// ----------------------------------------------------------------------------
+// Logging helper
+// ----------------------------------------------------------------------------
 void WriteLog(const std::string& msg) {
-    std::ofstream log("C:\\Users\\Training\\Desktop\\ProjectRoot\\BackendService\\backend.log", std::ios::app);
+    std::ofstream log(DB_DIR + "\\backend.log", std::ios::app);
     if (log.is_open()) {
         time_t now = time(0);
         char* dt = ctime(&now);
-        dt[strlen(dt) - 1] = 0; // Remove newline
+        dt[strlen(dt)-1] = 0; // strip newline
         log << dt << " - " << msg << std::endl;
-        log.flush();
     }
 }
 
-// Database
+// ----------------------------------------------------------------------------
+// Base64 decode using OpenSSL
+// ----------------------------------------------------------------------------
+std::vector<char> base64_decode(const std::string& input) {
+    BIO* b64 = BIO_new(BIO_f_base64());
+    BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
+    BIO* bmem = BIO_new_mem_buf(input.data(), static_cast<int>(input.size()));
+    bmem = BIO_push(b64, bmem);
+
+    std::vector<char> buffer(input.size());
+    int decodedLen = BIO_read(bmem, buffer.data(), static_cast<int>(buffer.size()));
+    BIO_free_all(bmem);
+
+    if (decodedLen > 0) {
+        buffer.resize(decodedLen);
+        return buffer;
+    }
+    return {};
+}
+
+// ----------------------------------------------------------------------------
+// Create or migrate database
+// ----------------------------------------------------------------------------
 void InitializeDatabase() {
-    sqlite3* db;
+    fs::create_directories(DB_DIR);
+    sqlite3* db = nullptr;
     if (sqlite3_open(DB_PATH.c_str(), &db) == SQLITE_OK) {
+        // Create table chunks_data
         const char* sql = R"(
-        CREATE TABLE IF NOT EXISTS chunk_index (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            cid TEXT NOT NULL,
-            chunk_hash TEXT NOT NULL,
-            chunk_path TEXT NOT NULL
+        CREATE TABLE IF NOT EXISTS chunks_data (
+            id           INTEGER PRIMARY KEY AUTOINCREMENT,
+            cid          TEXT    NOT NULL,
+            chunk_index  INTEGER NOT NULL,
+            chunk_path   TEXT    NOT NULL
         );
         )";
-        char* errMsg = nullptr;
-        if (sqlite3_exec(db, sql, nullptr, nullptr, &errMsg) != SQLITE_OK) {
-            WriteLog("DB Error: " + std::string(errMsg));
-            sqlite3_free(errMsg);
+        char* err = nullptr;
+        if (sqlite3_exec(db, sql, nullptr, nullptr, &err) != SQLITE_OK) {
+            WriteLog("DB Init Error: " + std::string(err));
+            sqlite3_free(err);
+        } else {
+            WriteLog("Database initialized (chunks_data).");
         }
         sqlite3_close(db);
     } else {
-        WriteLog("Failed to open database.");
+        WriteLog("Failed to open database at " + DB_PATH);
     }
 }
 
-bool InsertChunkMetadata(const std::string& cid, const std::string& hash, const std::string& path) {
-    sqlite3* db;
+// ----------------------------------------------------------------------------
+// Insert one row of metadata: cid + chunk_index + path
+// ----------------------------------------------------------------------------
+bool InsertChunkMetadata(const std::string& cid, int chunkIndex, const std::string& path) {
+    sqlite3* db = nullptr;
     if (sqlite3_open(DB_PATH.c_str(), &db) != SQLITE_OK) {
-        WriteLog("Failed to open database for insertion.");
+        WriteLog("DB Open Error on insert");
         return false;
     }
 
-    std::string sql = "INSERT INTO chunk_index (cid, chunk_hash, chunk_path) VALUES (?, ?, ?);";
-    sqlite3_stmt* stmt;
-    bool result = false;
-    
-    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
+    const char* sql = "INSERT INTO chunks_data (cid, chunk_index, chunk_path) VALUES (?, ?, ?);";
+    sqlite3_stmt* stmt = nullptr;
+    bool ok = false;
+
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
         sqlite3_bind_text(stmt, 1, cid.c_str(), -1, SQLITE_STATIC);
-        sqlite3_bind_text(stmt, 2, hash.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_int (stmt, 2, chunkIndex);
         sqlite3_bind_text(stmt, 3, path.c_str(), -1, SQLITE_STATIC);
-        
-        int step_result = sqlite3_step(stmt);
-        if (step_result == SQLITE_DONE) {
-            WriteLog("Successfully inserted metadata for chunk: " + hash);
-            result = true;
+
+        if (sqlite3_step(stmt) == SQLITE_DONE) {
+            WriteLog("Inserted chunk_index=" + std::to_string(chunkIndex) + " for CID=" + cid);
+            ok = true;
         } else {
-            WriteLog("Failed to insert metadata. Error code: " + std::to_string(step_result));
+            WriteLog("Insert failed for chunk_index=" + std::to_string(chunkIndex));
         }
-        
         sqlite3_finalize(stmt);
     } else {
-        WriteLog("Failed to prepare SQL statement");
+        WriteLog("Prepare failed for InsertChunkMetadata");
     }
-    
+
     sqlite3_close(db);
-    return result;
+    return ok;
 }
 
-// HTTP server implementation to replace the named pipe
+// ----------------------------------------------------------------------------
+// HTTP server: accept JSON with "cid", "chunks" (hashes), "data" (base64)
+// ----------------------------------------------------------------------------
 void RunHTTPServer() {
     fs::create_directories(CHUNK_DIR);
     InitializeDatabase();
-    WriteLog("ObjectStore service started. Database initialized.");
+    WriteLog("StorageService starting HTTP on port " + std::to_string(HTTP_PORT));
 
     httplib::Server server;
 
-    // Handle POST requests to store chunks
     server.Post("/store", [](const httplib::Request& req, httplib::Response& res) {
-        WriteLog("Received HTTP request to store chunks");
-        
+        WriteLog("POST /store received, Content-Length=" + std::to_string(req.body.size()));
         if (req.get_header_value("Content-Type") != "application/json") {
-            WriteLog("Invalid content type. Expected application/json");
             res.status = 400;
-            res.set_content("Invalid content type", "text/plain");
+            res.set_content("Expected application/json", "text/plain");
             return;
         }
-        
+
         try {
-            std::string jsonStr = req.body;
-            WriteLog("Received JSON data of size: " + std::to_string(jsonStr.size()));
-            
-            json payload = json::parse(jsonStr);
-            if (!payload.contains("cid") || !payload.contains("chunks") || !payload.contains("data")) {
-                WriteLog("Missing required fields in JSON payload");
+            json payload   = json::parse(req.body);
+            std::string cid= payload.at("cid").get<std::string>();
+            auto hashes    = payload.at("chunks").get<std::vector<std::string>>();
+            auto chunksB64 = payload.at("data").get<std::vector<std::string>>();
+
+            if (hashes.size() != chunksB64.size()) {
                 res.status = 400;
-                res.set_content("Missing required fields", "text/plain");
+                res.set_content("chunks/data size mismatch", "text/plain");
                 return;
             }
 
-            std::string cid = payload["cid"];
-            auto hashes = payload["chunks"].get<std::vector<std::string>>();
-            auto chunks = payload["data"].get<std::vector<std::string>>();
-
-            if (hashes.size() != chunks.size()) {
-                WriteLog("Error: Mismatch between hash count and chunk count");
-                res.status = 400;
-                res.set_content("Mismatch between hash count and chunk count", "text/plain");
-                return;
-            }
-
-            WriteLog("Processing CID: " + cid + " with " + std::to_string(hashes.size()) + " chunks");
-            fs::create_directories(CHUNK_DIR);
+            WriteLog("Storing CID=" + cid + " with " + std::to_string(hashes.size()) + " chunks");
 
             for (size_t i = 0; i < hashes.size(); ++i) {
-                std::string hash = hashes[i];
-                std::vector<char> chunkData = base64_decode(chunks[i]);
-                if (chunkData.empty()) {
-                    WriteLog("Failed to decode chunk " + std::to_string(i) + " with hash " + hash);
+                int    index = static_cast<int>(i) + 1;
+                auto   raw   = base64_decode(chunksB64[i]);
+                if (raw.empty()) {
+                    WriteLog("Decode failed for chunk " + std::to_string(i));
                     continue;
                 }
-
-                std::string chunkPath = CHUNK_DIR + "/" + hash + ".bin";
-                std::ofstream out(chunkPath, std::ios::binary);
-                if (!out.is_open()) {
-                    WriteLog("Failed to open file for writing: " + chunkPath);
-                    continue;
-                }
-
-                out.write(chunkData.data(), chunkData.size());
-                out.close();
-
-                if (!InsertChunkMetadata(cid, hash, chunkPath)) {
-                    WriteLog("Failed to insert metadata for chunk: " + hash);
-                }
+                // write out file
+                std::string path = CHUNK_DIR + "\\" + cid + "_chunk" + std::to_string(index) + ".bin";
+                std::ofstream ofs(path, std::ios::binary);
+                ofs.write(raw.data(), raw.size());
+                ofs.close();
+                // insert metadata
+                InsertChunkMetadata(cid, index, path);
             }
 
-            WriteLog("Successfully handled CID: " + cid);
             res.status = 200;
             res.set_content("Success", "text/plain");
-            
-        } catch (const std::exception& e) {
-            WriteLog("Error processing data: " + std::string(e.what()));
+        }
+        catch (std::exception& ex) {
+            WriteLog(std::string("Exception in /store: ") + ex.what());
             res.status = 500;
-            res.set_content("Internal server error: " + std::string(e.what()), "text/plain");
+            res.set_content("Server error", "text/plain");
         }
     });
-    
-    // Add health check endpoint
-    server.Get("/health", [](const httplib::Request&, httplib::Response& res) {
-        res.status = 200;
-        res.set_content("OK", "text/plain");
+
+    server.Get("/health", [](auto&, auto& res){
+        res.status = 200; res.set_content("OK","text/plain");
     });
 
     {
-        std::lock_guard<std::mutex> lock(serverMutex);
+        std::lock_guard<std::mutex> lk(serverMutex);
         serverPtr = &server;
         serverCV.notify_one();
     }
 
-    WriteLog("HTTP server started on port " + std::to_string(HTTP_PORT));
     server.listen("0.0.0.0", HTTP_PORT);
     WriteLog("HTTP server stopped");
 }
 
-// Service Control Handler
-void WINAPI ServiceCtrlHandler(DWORD ctrlCode) {
-    switch (ctrlCode) {
-    case SERVICE_CONTROL_STOP:
-        WriteLog("Received stop request");
-        serviceStatus.dwCurrentState = SERVICE_STOP_PENDING;
-        serviceStatus.dwWaitHint = 30000; // 30 seconds wait hint
-        SetServiceStatus(serviceStatusHandle, &serviceStatus);
-        
-        // Signal our main thread to stop
+// ----------------------------------------------------------------------------
+// Windows Service plumbing
+// ----------------------------------------------------------------------------
+void WINAPI ServiceCtrlHandler(DWORD code) {
+    if (code == SERVICE_CONTROL_STOP) {
+        WriteLog("Service stopping...");
         running = false;
-        
-        // Stop the HTTP server if it's running
-        {
-            std::lock_guard<std::mutex> lock(serverMutex);
-            if (serverPtr) serverPtr->stop();
-        }
-        break;
+        SERVICE_STATUS ss = {};
+        ss.dwCurrentState = SERVICE_STOP_PENDING;
+        SetServiceStatus(serviceStatusHandle, &ss);
+        if (serverPtr) serverPtr->stop();
     }
 }
 
-// Service Main Function
-void WINAPI ServiceMain(DWORD argc, LPSTR* argv) {
+void WINAPI ServiceMain(DWORD, LPSTR*) {
     serviceStatusHandle = RegisterServiceCtrlHandler("ObjectStore", ServiceCtrlHandler);
-    
-    // Initialize service status
-    ZeroMemory(&serviceStatus, sizeof(serviceStatus));
-    serviceStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
-    serviceStatus.dwControlsAccepted = SERVICE_ACCEPT_STOP;
-    serviceStatus.dwCurrentState = SERVICE_START_PENDING;
-    serviceStatus.dwWaitHint = 10000; // 10 seconds for startup
-    SetServiceStatus(serviceStatusHandle, &serviceStatus);
-
     running = true;
+    std::thread t(RunHTTPServer);
 
-    std::thread serverThread(RunHTTPServer);
-    WriteLog("Server thread started");
+    SERVICE_STATUS ss = {};
+    ss.dwServiceType    = SERVICE_WIN32_OWN_PROCESS;
+    ss.dwControlsAccepted = SERVICE_ACCEPT_STOP;
+    ss.dwCurrentState   = SERVICE_RUNNING;
+    SetServiceStatus(serviceStatusHandle, &ss);
 
     {
-        std::unique_lock<std::mutex> lock(serverMutex);
-        serverCV.wait(lock, [] { return serverPtr != nullptr; });
-    }
-    
-    serviceStatus.dwCurrentState = SERVICE_RUNNING;
-    SetServiceStatus(serviceStatusHandle, &serviceStatus);
-
-    // Wait until stop is triggered
-    while (running) {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::unique_lock<std::mutex> lk(serverMutex);
+        serverCV.wait(lk, []{ return serverPtr != nullptr; });
     }
 
-    WriteLog("Waiting for server thread to exit");
-    if (serverThread.joinable()) serverThread.join();
-    WriteLog("Server thread exited");
+    while (running) std::this_thread::sleep_for(std::chrono::seconds(1));
+    t.join();
 
-    serviceStatus.dwCurrentState = SERVICE_STOPPED;
-    SetServiceStatus(serviceStatusHandle, &serviceStatus);
-    WriteLog("Service stopped");
+    ss.dwCurrentState = SERVICE_STOPPED;
+    SetServiceStatus(serviceStatusHandle, &ss);
 }
 
-// Entry point
 int main() {
-    SERVICE_TABLE_ENTRY serviceTable[] = {
+    SERVICE_TABLE_ENTRY table[] = {
         { (LPSTR)"ObjectStore", ServiceMain },
-        { NULL, NULL }
+        { nullptr, nullptr }
     };
-
-    if (!StartServiceCtrlDispatcher(serviceTable)) {
-        DWORD error = GetLastError();
-        // If called from command line, not as service
-        if (error == ERROR_FAILED_SERVICE_CONTROLLER_CONNECT) {
-            WriteLog("Running as standalone application (not as service)");
-            running = true;
-            RunHTTPServer();
-            return 0;
-        }
-        
-        WriteLog("Failed to start service control dispatcher. Error code: " + std::to_string(error));
+    if (!StartServiceCtrlDispatcher(table)) {
+        // run as console
+        running = true;
+        RunHTTPServer();
     }
-
     return 0;
 }
