@@ -11,9 +11,9 @@
 #include <queue>
 #include <condition_variable>
 #include <atomic>
-
 #include <nlohmann/json.hpp>
-
+#include <sstream>
+#include <algorithm>
 #include "httplib.h"
 #include <windows.h>
 #include <ctime>
@@ -27,14 +27,18 @@
 #include <openssl/evp.h>
 #include <openssl/buffer.h>
 
-#include <random>
-#include <sstream>
-#include <iomanip>
+std::ofstream logFile("C:\\Users\\Training\\Desktop\\ProjectRoot\\FrontendService\\frontend.log", std::ios::app);
+void WriteLog(const std::string& message) {
+    if (logFile.is_open()) {
+        time_t now = time(0);
+        char* dt = ctime(&now);
+        dt[strlen(dt) - 1] = 0;
+        logFile << dt << " - " << message << std::endl;
+        logFile.flush();
+    }
+}
 
-// Global log file
-std::ofstream logFile("frontend.log", std::ios::app);
-
-// Backend service configuration
+const std::string BACKEND_FILE_ENDPOINT = "/file";
 const std::string BACKEND_HOST = "127.0.0.1";
 const int BACKEND_PORT = 8081;
 const std::string BACKEND_ENDPOINT = "/store";
@@ -45,7 +49,7 @@ std::string base64Encode(const std::vector<char>& data) {
     b64 = BIO_new(BIO_f_base64());
     bio = BIO_new(BIO_s_mem());
     bio = BIO_push(b64, bio);
-    BIO_set_flags(bio, BIO_FLAGS_BASE64_NO_NL); // no newlines
+    BIO_set_flags(bio, BIO_FLAGS_BASE64_NO_NL);
     BIO_write(bio, data.data(), static_cast<int>(data.size()));
     BIO_flush(bio);
     BIO_get_mem_ptr(bio, &bufferPtr);
@@ -54,7 +58,25 @@ std::string base64Encode(const std::vector<char>& data) {
     return result;
 }
 
-// 64-bit random hex suffix
+std::vector<char> base64Decode(const std::string& encoded) {
+    BIO* b64 = BIO_new(BIO_f_base64());
+    BIO* bmem = BIO_new_mem_buf(encoded.data(), static_cast<int>(encoded.size()));
+    BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
+    bmem = BIO_push(b64, bmem);
+    
+    std::vector<char> buffer(encoded.size());
+    int decodedLen = BIO_read(bmem, buffer.data(), static_cast<int>(buffer.size()));
+    BIO_free_all(bmem);
+    
+    if (decodedLen > 0) {
+        buffer.resize(decodedLen);
+    } else {
+        buffer.clear();
+    }
+    
+    return buffer;
+}
+
 static std::string randomHex64() {
     static std::random_device rd;
     static std::mt19937_64 eng(rd());
@@ -64,39 +86,24 @@ static std::string randomHex64() {
     return ss.str();
 }
 
-// CID = SHA256(concat(chunkHashes)) + "_" + randomHex64()
 std::string generateCID(const std::vector<std::string>& chunkHashes) {
-    // 1) build one big string
     std::string combined;
     combined.reserve(chunkHashes.size() * 64);
     for (auto& h : chunkHashes) combined += h;
 
-    // 2) SHA256 it
     unsigned char digest[SHA256_DIGEST_LENGTH];
     SHA256(reinterpret_cast<const unsigned char*>(combined.data()),
            combined.size(),
            digest);
 
-    // 3) hex-encode the digest
     std::ostringstream hex;
     for (int i = 0; i < SHA256_DIGEST_LENGTH; ++i) {
         hex << std::hex << std::setw(2) << std::setfill('0')
             << static_cast<int>(digest[i]);
     }
 
-    // 4) append suffix
     hex << "_" << randomHex64();
     return hex.str();
-}
-
-void WriteLog(const std::string& message) {
-    if (logFile.is_open()) {
-        time_t now = time(0);
-        char* dt = ctime(&now);
-        dt[strlen(dt) - 1] = 0; // Remove newline
-        logFile << dt << " - " << message << std::endl;
-        logFile.flush();
-    }
 }
 
 namespace fs = std::filesystem;
@@ -106,14 +113,13 @@ SERVICE_STATUS serviceStatus;
 SERVICE_STATUS_HANDLE serviceStatusHandle;
 static std::atomic<bool> paused(false);
 std::atomic<bool> running(false);
-// Allow RunServer() to see the paused flag
 extern std::atomic<bool> paused;
 
 std::mutex serverMutex;
 std::condition_variable serverCV;
 httplib::Server* serverPtr = nullptr;
 
-const size_t CHUNK_SIZE = 1024 * 1024; // 1MB
+const size_t CHUNK_SIZE = 1024 * 1024;
 
 class ThreadPool {
 public:
@@ -175,20 +181,61 @@ std::string computeHash(const std::vector<char>& data) {
     return hex;
 }
 
-// Replace SendToBackendIPC with HTTP client
+std::pair<std::vector<char>, std::string> GetFileFromBackend(const std::string& cid) {
+    WriteLog("Retrieving file with CID: " + cid + " from backend");
+    
+    httplib::Client client(BACKEND_HOST, BACKEND_PORT);
+    client.set_connection_timeout(10);
+    client.set_read_timeout(60);
+    
+    auto res = client.Get(BACKEND_FILE_ENDPOINT + "/" + cid);
+    
+    if (!res || res->status != 200) {
+        WriteLog("Failed to connect or retrieve from backend: " + (res ? std::to_string(res->status) : "No response"));
+        return {{}, ""};
+    }
+    
+    try {
+        json response = json::parse(res->body);
+        std::string original_filename = response.value("original_filename", "");
+        
+        std::vector<std::pair<int, std::string>> chunks;
+        for (const auto& chunk : response["chunks"]) {
+            int index = chunk["index"];
+            std::string data = chunk["data"];
+            chunks.emplace_back(index, data);
+        }
+        
+        std::sort(chunks.begin(), chunks.end(), [](const auto& a, const auto& b) {
+            return a.first < b.first;
+        });
+        
+        std::vector<char> fileData;
+        for (const auto& [index, encodedData] : chunks) {
+            auto chunkData = base64Decode(encodedData);
+            fileData.insert(fileData.end(), chunkData.begin(), chunkData.end());
+        }
+        
+        WriteLog("Successfully retrieved file with CID: " + cid + " (" + std::to_string(fileData.size()) + " bytes)");
+        return {fileData, original_filename};
+        
+    } catch (const std::exception& e) {
+        WriteLog("Error parsing backend response: " + std::string(e.what()));
+        return {{}, ""};
+    }
+}
+
 bool SendToBackendHTTP(const std::string& jsonPayload) {
     WriteLog("Connecting to backend service at " + BACKEND_HOST + ":" + std::to_string(BACKEND_PORT));
     
     httplib::Client client(BACKEND_HOST, BACKEND_PORT);
-    client.set_connection_timeout(10); // 10 seconds timeout
-    client.set_read_timeout(60); // 60 seconds read timeout for large payloads
+    client.set_connection_timeout(10);
+    client.set_read_timeout(60);
     
-    // Set appropriate content type
     httplib::Headers headers = {
         {"Content-Type", "application/json"}
     };
     
-    // Send POST request with JSON payload
     auto res = client.Post(BACKEND_ENDPOINT, headers, jsonPayload, "application/json");
     
     if (!res) {
@@ -219,8 +266,7 @@ void RunServer() {
         const auto& file = req.get_file_value("file");
         WriteLog("Received upload: " + file.filename + " (" + std::to_string(file.content.size()) + " bytes)");
 
-        // For very small files, just process directly
-        if (file.content.size() < 1024 * 1024) { // Less than 1MB
+        if (file.content.size() < 1024 * 1024) {
             std::vector<char> data(file.content.begin(), file.content.end());
             std::vector<std::string> chunkHashes;
             std::vector<std::string> encodedChunks;
@@ -246,11 +292,11 @@ void RunServer() {
             std::string cid = generateCID(chunkHashes);
             WriteLog("Generated CID: " + cid);
 
-            // Build JSON payload
             json payload;
             payload["cid"] = cid;
             payload["chunks"] = chunkHashes;
             payload["data"] = encodedChunks;
+            payload["original_filename"] = file.filename;
 
             std::string jsonStr = payload.dump();
             WriteLog("JSON payload size: " + std::to_string(jsonStr.size()) + " bytes");
@@ -268,10 +314,9 @@ void RunServer() {
             return;
         }
 
-        // For larger files, process in smaller chunks to avoid memory issues
         std::vector<std::string> chunkHashes;
         std::vector<std::string> encodedChunks;
-        const size_t processSize = 1024 * 1024; // Process 1MB at a time
+        const size_t processSize = 1024 * 1024;
 
         for (size_t fileOffset = 0; fileOffset < file.content.size(); fileOffset += processSize) {
             size_t processLength = std::min(processSize, file.content.size() - fileOffset);
@@ -298,11 +343,11 @@ void RunServer() {
         std::string cid = generateCID(chunkHashes);
         WriteLog("Generated CID: " + cid);
 
-        // Build JSON payload
         json payload;
         payload["cid"] = cid;
         payload["chunks"] = chunkHashes;
         payload["data"] = encodedChunks;
+        payload["original_filename"] = file.filename;
 
         std::string jsonStr = payload.dump();
         WriteLog("JSON payload size: " + std::to_string(jsonStr.size()) + " bytes");
@@ -317,6 +362,33 @@ void RunServer() {
         WriteLog("Successfully sent to backend. Returning CID to client.");
         res.status = 200;
         res.set_content(cid, "text/plain");
+    });
+
+    server.Get("/files/:cid", [](const httplib::Request& req, httplib::Response& res) {
+        std::string cid = req.path_params.at("cid");
+        WriteLog("Received request for file with CID: " + cid);
+        
+        auto [fileData, original_filename] = GetFileFromBackend(cid);
+        
+        if (fileData.empty()) {
+            res.status = 404;
+            res.set_content("File not found", "text/plain");
+            WriteLog("File with CID: " + cid + " not found");
+            return;
+        }
+        
+        if (original_filename.empty()) {
+            original_filename = "file-" + cid;
+            WriteLog("No original filename found for CID: " + cid + ", using default");
+        }
+        
+        res.set_header("Content-Type", "application/octet-stream");
+        res.set_header("Content-Disposition", "attachment; filename=\"" + original_filename + "\"");
+        
+        res.body.assign(fileData.begin(), fileData.end());
+        res.status = 200;
+        
+        WriteLog("Successfully served file with CID: " + cid + " as " + original_filename);
     });
 
     {
@@ -380,7 +452,6 @@ void WINAPI ServiceMain(DWORD argc, LPSTR* argv) {
 }
 
 int main() {
-    // Open log file
     std::string logDir = "C:\\Users\\Training\\Desktop\\ProjectRoot\\FrontendService";
     std::string logPath = logDir + "\\frontend.log";
     logFile.open(logPath, std::ios::app);
@@ -393,7 +464,6 @@ int main() {
 
     if (!StartServiceCtrlDispatcher(serviceTable)) {
         DWORD error = GetLastError();
-        // If called from command line, not as service
         if (error == ERROR_FAILED_SERVICE_CONTROLLER_CONNECT) {
             WriteLog("Running as standalone application (not as service)");
             running = true;
