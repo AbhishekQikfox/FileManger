@@ -1,0 +1,58 @@
+Tue May  6 15:03:18 2025 - Server thread started
+Tue May  6 15:03:18 2025 - ObjectStore service started. Database initialized.
+Tue May  6 15:03:18 2025 - Pipe created. Waiting for connection...
+Tue May  6 15:03:38 2025 - Client connected to pipe immediately.
+Tue May  6 15:03:38 2025 - ReadFile failed with error: 109
+Tue May  6 15:03:38 2025 - No data received from pipe.
+Tue May  6 15:03:38 2025 - Pipe created. Waiting for connection...
+Tue May  6 15:07:22 2025 - Client connected to pipe immediately.
+Tue May  6 15:07:22 2025 - ReadFile failed with error: 109
+Tue May  6 15:07:22 2025 - No data received from pipe.
+Tue May  6 15:07:22 2025 - Pipe created. Waiting for connection...
+Tue May  6 15:08:35 2025 - Client connected to pipe immediately.
+Tue May  6 15:08:35 2025 - ReadFile failed with error: 109
+Tue May  6 15:08:35 2025 - No data received from pipe.
+Tue May  6 15:08:35 2025 - Pipe created. Waiting for connection...
+Tue May  6 15:15:03 2025 - Received stop request
+Tue May  6 15:15:03 2025 - Canceling pending pipe operations
+Tue May  6 15:15:03 2025 - Waiting for server thread to exit
+Tue May  6 15:31:21 2025 - Server thread started
+Tue May  6 15:31:21 2025 - ObjectStore service started. Database initialized.
+Tue May  6 15:31:21 2025 - Pipe created. Waiting for connection...
+Tue May  6 15:31:43 2025 - Client connected
+Tue May  6 15:31:43 2025 - ReadFile error: 109
+Tue May  6 15:31:43 2025 - No data received
+Tue May  6 15:31:43 2025 - Pipe created. Waiting for connection...
+Tue May  6 15:35:10 2025 - Client connected
+Tue May  6 15:35:10 2025 - ReadFile error: 109
+Tue May  6 15:35:10 2025 - No data received
+Tue May  6 15:35:10 2025 - Pipe created. Waiting for connection...
+Tue May  6 15:40:09 2025 - Received stop request
+Tue May  6 15:40:09 2025 - Canceling pending pipe operations
+Tue May  6 15:40:10 2025 - Waiting for server thread to exit
+Tue May  6 16:11:21 2025 - Server thread started
+Tue May  6 16:11:21 2025 - ObjectStore service started. Database initialized.
+Tue May  6 16:11:21 2025 - Pipe created. Waiting for connection...
+Tue May  6 16:11:45 2025 - Client connected
+Tue May  6 16:11:45 2025 - Client connected to pipe
+Tue May  6 16:11:45 2025 - PeekNamedPipe failed with error: 109
+Tue May  6 16:11:45 2025 - Pipe created. Waiting for connection...
+Tue May  6 16:21:04 2025 - Received stop request
+Tue May  6 16:21:04 2025 - Canceling pending pipe operations
+Tue May  6 16:21:05 2025 - Waiting for server thread to exit
+Tue May  6 16:28:06 2025 - Server thread started
+Tue May  6 16:28:06 2025 - ObjectStore service started. Database initialized.
+Tue May  6 16:28:06 2025 - HTTP server started on port 8081
+Tue May  6 16:28:52 2025 - Received HTTP request to store chunks
+Tue May  6 16:28:52 2025 - Received JSON data of size: 2796459
+Tue May  6 16:28:52 2025 - Processing CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_054515c9690d9697 with 2 chunks
+Tue May  6 16:28:52 2025 - Successfully inserted metadata for chunk: 4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56
+Tue May  6 16:28:52 2025 - Successfully inserted metadata for chunk: 4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56
+Tue May  6 16:28:52 2025 - Successfully handled CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_054515c9690d9697
+Tue May  6 16:35:02 2025 - Received HTTP request to store chunks
+Tue May  6 16:35:02 2025 - Received JSON data of size: 4194633
+Tue May  6 16:35:02 2025 - Processing CID: d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_961ad2966928deb1 with 3 chunks
+Tue May  6 16:35:02 2025 - Successfully inserted metadata for chunk: 5ae9782017a68037004b2bf806c77d324db4d915ed3725d84eb3121b2ad16061
+Tue May  6 16:35:02 2025 - Successfully inserted metadata for chunk: 4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56
+Tue May  6 16:35:02 2025 - Successfully inserted metadata for chunk: 4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56
+Tue May  6 16:35:02 2025 - Successfully handled CID: d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_961ad2966928deb1
