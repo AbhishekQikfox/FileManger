@@ -135,6 +135,63 @@ bool InsertChunkMetadata(const std::string& cid, int chunkIndex, const std::stri
     return ok;
 }
 
+std::vector<std::pair<int, std::string>> GetChunkPathsByCID(const std::string& cid) {
+    std::vector<std::pair<int, std::string>> result;
+    sqlite3* db = nullptr;
+    
+    if (sqlite3_open(DB_PATH.c_str(), &db) != SQLITE_OK) {
+        WriteLog("DB Open Error on GetChunkPathsByCID");
+        return result;
+    }
+
+    const char* sql = "SELECT chunk_index, chunk_path FROM chunks_data WHERE cid = ? ORDER BY chunk_index ASC;";
+    sqlite3_stmt* stmt = nullptr;
+
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+        sqlite3_bind_text(stmt, 1, cid.c_str(), -1, SQLITE_STATIC);
+        
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            int chunkIndex = sqlite3_column_int(stmt, 0);
+            const char* path = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+            if (path) {
+                result.emplace_back(chunkIndex, std::string(path));
+            }
+        }
+        
+        sqlite3_finalize(stmt);
+    } else {
+        WriteLog("Prepare failed for GetChunkPathsByCID");
+    }
+
+    sqlite3_close(db);
+    return result;
+}
+
+// Add this function to read a file into a vector
+std::vector<char> ReadFileToVector(const std::string& filePath) {
+    std::vector<char> buffer;
+    std::ifstream file(filePath, std::ios::binary);
+    
+    if (!file.is_open()) {
+        WriteLog("Failed to open file: " + filePath);
+        return buffer;
+    }
+    
+    // Get file size
+    file.seekg(0, std::ios::end);
+    size_t size = file.tellg();
+    file.seekg(0, std::ios::beg);
+    
+    // Read file content
+    buffer.resize(size);
+    if (size > 0) {
+        file.read(buffer.data(), size);
+    }
+    
+    return buffer;
+}
+
+
 // ----------------------------------------------------------------------------
 // HTTP server: accept JSON with "cid", "chunks" (hashes), "data" (base64)
 // ----------------------------------------------------------------------------
@@ -195,6 +252,60 @@ void RunHTTPServer() {
 
     server.Get("/health", [](auto&, auto& res){
         res.status = 200; res.set_content("OK","text/plain");
+    });
+
+    server.Get("/file/:cid", [](const httplib::Request& req, httplib::Response& res) {
+        std::string cid = req.path_params.at("cid");
+        WriteLog("GET /file/" + cid + " received");
+        
+        // Get all chunk paths for this CID
+        auto chunks = GetChunkPathsByCID(cid);
+        
+        if (chunks.empty()) {
+            res.status = 404;
+            res.set_content("File not found", "text/plain");
+            WriteLog("No chunks found for CID: " + cid);
+            return;
+        }
+        
+        WriteLog("Found " + std::to_string(chunks.size()) + " chunks for CID: " + cid);
+        
+        // Prepare JSON response with chunk data
+        json response;
+        response["cid"] = cid;
+        response["chunks"] = json::array();
+        
+        for (const auto& [index, path] : chunks) {
+            auto chunkData = ReadFileToVector(path);
+            if (chunkData.empty()) {
+                WriteLog("Failed to read chunk file: " + path);
+                continue;
+            }
+            
+            // Base64 encode the chunk
+            BIO* b64 = BIO_new(BIO_f_base64());
+            BIO* bmem = BIO_new(BIO_s_mem());
+            BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
+            BIO_push(b64, bmem);
+    
+            BIO_write(b64, chunkData.data(), static_cast<int>(chunkData.size()));
+            BIO_flush(b64);
+            
+            BUF_MEM* bptr;
+            BIO_get_mem_ptr(b64, &bptr);
+            
+            std::string encodedChunk(bptr->data, bptr->length);
+            BIO_free_all(b64);
+            
+            // Add to response
+            json chunkObj;
+            chunkObj["index"] = index;
+            chunkObj["data"] = encodedChunk;
+            response["chunks"].push_back(chunkObj);
+        }
+        
+        res.set_content(response.dump(), "application/json");
+        WriteLog("Successfully sent file data for CID: " + cid);
     });
 
     {

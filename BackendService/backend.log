@@ -72,3 +72,16 @@ Tue May  6 16:58:51 2025 - Storing CID=d5fa106cbb953d0fd77b1d586835dbdc1d2279b29
 Tue May  6 16:58:51 2025 - Inserted chunk_index=1 for CID=d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_33987f6f33000a0f
 Tue May  6 16:58:51 2025 - Inserted chunk_index=2 for CID=d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_33987f6f33000a0f
 Tue May  6 16:58:51 2025 - Inserted chunk_index=3 for CID=d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_33987f6f33000a0f
+Tue May  6 17:25:30 2025 - Service stopping...
+Tue May  6 17:25:30 2025 - HTTP server stopped
+Tue May  6 17:33:22 2025 - Database initialized (chunks_data).
+Tue May  6 17:33:22 2025 - StorageService starting HTTP on port 8081
+Tue May  6 17:34:21 2025 - GET /file/d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_33987f6f33000a0f received
+Tue May  6 17:34:21 2025 - Found 3 chunks for CID: d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_33987f6f33000a0f
+Tue May  6 17:34:21 2025 - Successfully sent file data for CID: d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_33987f6f33000a0f
+Tue May  6 17:34:28 2025 - GET /file/d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_33987f6f33000a0f received
+Tue May  6 17:34:28 2025 - Found 3 chunks for CID: d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_33987f6f33000a0f
+Tue May  6 17:34:29 2025 - Successfully sent file data for CID: d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_33987f6f33000a0f
+Tue May  6 17:35:21 2025 - GET /file/9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_21ef2359ce224010 received
+Tue May  6 17:35:21 2025 - Found 2 chunks for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_21ef2359ce224010
+Tue May  6 17:35:21 2025 - Successfully sent file data for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_21ef2359ce224010
