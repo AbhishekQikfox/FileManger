@@ -14,13 +14,12 @@
 #include <atomic>
 #include <mutex>
 #include <condition_variable>
-
-// OpenSSL headers for base64 decoding
 #include <openssl/bio.h>
 #include <openssl/evp.h>
 #include <openssl/buffer.h>
+#include <openssl/sha.h>
 
-#include "httplib.h" // HTTP server
+#include "httplib.h"
 
 namespace fs = std::filesystem;
 using json = nlohmann::json;
@@ -28,33 +27,26 @@ using json = nlohmann::json;
 const std::string DB_DIR   = "C:\\Users\\Training\\Desktop\\ProjectRoot\\BackendService";
 const std::string DB_PATH  = DB_DIR + "\\chunks.db";
 const std::string CHUNK_DIR= DB_DIR + "\\Chunks";
-const int HTTP_PORT        = 8081; // Port for the HTTP server
+const int HTTP_PORT        = 8081;
 
 SERVICE_STATUS            serviceStatus;
 SERVICE_STATUS_HANDLE     serviceStatusHandle;
 std::atomic<bool>         running(false);
 
-// For coordinating server startup/shutdown
 std::mutex                serverMutex;
 std::condition_variable   serverCV;
 httplib::Server*          serverPtr = nullptr;
 
-// ----------------------------------------------------------------------------
-// Logging helper
-// ----------------------------------------------------------------------------
 void WriteLog(const std::string& msg) {
     std::ofstream log(DB_DIR + "\\backend.log", std::ios::app);
     if (log.is_open()) {
         time_t now = time(0);
         char* dt = ctime(&now);
-        dt[strlen(dt)-1] = 0; // strip newline
+        dt[strlen(dt)-1] = 0;
         log << dt << " - " << msg << std::endl;
     }
 }
 
-// ----------------------------------------------------------------------------
-// Base64 decode using OpenSSL
-// ----------------------------------------------------------------------------
 std::vector<char> base64_decode(const std::string& input) {
     BIO* b64 = BIO_new(BIO_f_base64());
     BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
@@ -72,15 +64,26 @@ std::vector<char> base64_decode(const std::string& input) {
     return {};
 }
 
-// ----------------------------------------------------------------------------
-// Create or migrate database
-// ----------------------------------------------------------------------------
+std::string computeContentHash(const std::vector<std::string>& chunksB64) {
+    std::string combined;
+    for (const auto& chunk : chunksB64) {
+        auto raw = base64_decode(chunk);
+        combined.insert(combined.end(), raw.begin(), raw.end());
+    }
+    unsigned char digest[SHA256_DIGEST_LENGTH];
+    SHA256(reinterpret_cast<const unsigned char*>(combined.data()), combined.size(), digest);
+    std::ostringstream hex;
+    for (int i = 0; i < SHA256_DIGEST_LENGTH; ++i) {
+        hex << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(digest[i]);
+    }
+    return hex.str();
+}
+
 void InitializeDatabase() {
     fs::create_directories(DB_DIR);
     sqlite3* db = nullptr;
     if (sqlite3_open(DB_PATH.c_str(), &db) == SQLITE_OK) {
-        // Create table chunks_data
-        const char* sql = R"(
+        const char* sql_chunks = R"(
         CREATE TABLE IF NOT EXISTS chunks_data (
             id           INTEGER PRIMARY KEY AUTOINCREMENT,
             cid          TEXT    NOT NULL,
@@ -89,11 +92,33 @@ void InitializeDatabase() {
         );
         )";
         char* err = nullptr;
-        if (sqlite3_exec(db, sql, nullptr, nullptr, &err) != SQLITE_OK) {
-            WriteLog("DB Init Error: " + std::string(err));
+        if (sqlite3_exec(db, sql_chunks, nullptr, nullptr, &err) != SQLITE_OK) {
+            WriteLog("DB Init Error for chunks_data: " + std::string(err));
+            sqlite3_free(err);
+        }
+
+        const char* sql_metadata = R"(
+        CREATE TABLE IF NOT EXISTS file_metadata (
+            cid               TEXT    PRIMARY KEY,
+            original_filename TEXT    NOT NULL
+        );
+        )";
+        if (sqlite3_exec(db, sql_metadata, nullptr, nullptr, &err) != SQLITE_OK) {
+            WriteLog("DB Init Error for file_metadata: " + std::string(err));
+            sqlite3_free(err);
+        }
+
+        const char* sql_references = R"(
+        CREATE TABLE IF NOT EXISTS content_references (
+            content_hash TEXT    PRIMARY KEY,
+            ref_count    INTEGER NOT NULL DEFAULT 1
+        );
+        )";
+        if (sqlite3_exec(db, sql_references, nullptr, nullptr, &err) != SQLITE_OK) {
+            WriteLog("DB Init Error for content_references: " + std::string(err));
             sqlite3_free(err);
         } else {
-            WriteLog("Database initialized (chunks_data).");
+            WriteLog("Database initialized (chunks_data, file_metadata, content_references).");
         }
         sqlite3_close(db);
     } else {
@@ -101,9 +126,6 @@ void InitializeDatabase() {
     }
 }
 
-// ----------------------------------------------------------------------------
-// Insert one row of metadata: cid + chunk_index + path
-// ----------------------------------------------------------------------------
 bool InsertChunkMetadata(const std::string& cid, int chunkIndex, const std::string& path) {
     sqlite3* db = nullptr;
     if (sqlite3_open(DB_PATH.c_str(), &db) != SQLITE_OK) {
@@ -133,6 +155,113 @@ bool InsertChunkMetadata(const std::string& cid, int chunkIndex, const std::stri
 
     sqlite3_close(db);
     return ok;
+}
+
+bool InsertFileMetadata(const std::string& cid, const std::string& original_filename) {
+    sqlite3* db = nullptr;
+    if (sqlite3_open(DB_PATH.c_str(), &db) != SQLITE_OK) {
+        WriteLog("DB Open Error on InsertFileMetadata");
+        return false;
+    }
+
+    const char* sql = "INSERT INTO file_metadata (cid, original_filename) VALUES (?, ?);";
+    sqlite3_stmt* stmt = nullptr;
+    bool ok = false;
+
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+        sqlite3_bind_text(stmt, 1, cid.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 2, original_filename.c_str(), -1, SQLITE_STATIC);
+
+        if (sqlite3_step(stmt) == SQLITE_DONE) {
+            WriteLog("Inserted metadata for CID=" + cid);
+            ok = true;
+        } else {
+            WriteLog("Insert failed for metadata CID=" + cid);
+        }
+        sqlite3_finalize(stmt);
+    } else {
+        WriteLog("Prepare failed for InsertFileMetadata");
+    }
+
+    sqlite3_close(db);
+    return ok;
+}
+
+bool UpdateContentReference(const std::string& content_hash) {
+    sqlite3* db = nullptr;
+    if (sqlite3_open(DB_PATH.c_str(), &db) != SQLITE_OK) {
+        WriteLog("DB Open Error on UpdateContentReference");
+        return false;
+    }
+
+    const char* sql_select = "SELECT ref_count FROM content_references WHERE content_hash = ?;";
+    sqlite3_stmt* stmt_select = nullptr;
+    int ref_count = 0;
+    bool exists = false;
+
+    if (sqlite3_prepare_v2(db, sql_select, -1, &stmt_select, nullptr) == SQLITE_OK) {
+        sqlite3_bind_text(stmt_select, 1, content_hash.c_str(), -1, SQLITE_STATIC);
+        if (sqlite3_step(stmt_select) == SQLITE_ROW) {
+            ref_count = sqlite3_column_int(stmt_select, 0);
+            exists = true;
+        }
+        sqlite3_finalize(stmt_select);
+    }
+
+    bool ok = false;
+    if (exists) {
+        const char* sql_update = "UPDATE content_references SET ref_count = ? WHERE content_hash = ?;";
+        sqlite3_stmt* stmt_update = nullptr;
+        if (sqlite3_prepare_v2(db, sql_update, -1, &stmt_update, nullptr) == SQLITE_OK) {
+            sqlite3_bind_int(stmt_update, 1, ref_count + 1);
+            sqlite3_bind_text(stmt_update, 2, content_hash.c_str(), -1, SQLITE_STATIC);
+            if (sqlite3_step(stmt_update) == SQLITE_DONE) {
+                WriteLog("Incremented ref_count to " + std::to_string(ref_count + 1) + " for hash=" + content_hash);
+                ok = true;
+            }
+            sqlite3_finalize(stmt_update);
+        }
+    } else {
+        const char* sql_insert = "INSERT INTO content_references (content_hash, ref_count) VALUES (?, 1);";
+        sqlite3_stmt* stmt_insert = nullptr;
+        if (sqlite3_prepare_v2(db, sql_insert, -1, &stmt_insert, nullptr) == SQLITE_OK) {
+            sqlite3_bind_text(stmt_insert, 1, content_hash.c_str(), -1, SQLITE_STATIC);
+            if (sqlite3_step(stmt_insert) == SQLITE_DONE) {
+                WriteLog("Inserted new content hash=" + content_hash + " with ref_count=1");
+                ok = true;
+            }
+            sqlite3_finalize(stmt_insert);
+        }
+    }
+
+    sqlite3_close(db);
+    return ok;
+}
+
+std::string GetOriginalFilename(const std::string& cid) {
+    sqlite3* db = nullptr;
+    if (sqlite3_open(DB_PATH.c_str(), &db) != SQLITE_OK) {
+        WriteLog("DB Open Error on GetOriginalFilename");
+        return "";
+    }
+
+    const char* sql = "SELECT original_filename FROM file_metadata WHERE cid = ?;";
+    sqlite3_stmt* stmt = nullptr;
+    std::string filename;
+
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+        sqlite3_bind_text(stmt, 1, cid.c_str(), -1, SQLITE_STATIC);
+        if (sqlite3_step(stmt) == SQLITE_ROW) {
+            const char* fn = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+            if (fn) filename = fn;
+        }
+        sqlite3_finalize(stmt);
+    } else {
+        WriteLog("Prepare failed for GetOriginalFilename");
+    }
+
+    sqlite3_close(db);
+    return filename;
 }
 
 std::vector<std::pair<int, std::string>> GetChunkPathsByCID(const std::string& cid) {
@@ -167,7 +296,6 @@ std::vector<std::pair<int, std::string>> GetChunkPathsByCID(const std::string& c
     return result;
 }
 
-// Add this function to read a file into a vector
 std::vector<char> ReadFileToVector(const std::string& filePath) {
     std::vector<char> buffer;
     std::ifstream file(filePath, std::ios::binary);
@@ -177,12 +305,10 @@ std::vector<char> ReadFileToVector(const std::string& filePath) {
         return buffer;
     }
     
-    // Get file size
     file.seekg(0, std::ios::end);
     size_t size = file.tellg();
     file.seekg(0, std::ios::beg);
     
-    // Read file content
     buffer.resize(size);
     if (size > 0) {
         file.read(buffer.data(), size);
@@ -191,10 +317,6 @@ std::vector<char> ReadFileToVector(const std::string& filePath) {
     return buffer;
 }
 
-
-// ----------------------------------------------------------------------------
-// HTTP server: accept JSON with "cid", "chunks" (hashes), "data" (base64)
-// ----------------------------------------------------------------------------
 void RunHTTPServer() {
     fs::create_directories(CHUNK_DIR);
     InitializeDatabase();
@@ -215,6 +337,7 @@ void RunHTTPServer() {
             std::string cid= payload.at("cid").get<std::string>();
             auto hashes    = payload.at("chunks").get<std::vector<std::string>>();
             auto chunksB64 = payload.at("data").get<std::vector<std::string>>();
+            std::string original_filename = payload.at("original_filename").get<std::string>();
 
             if (hashes.size() != chunksB64.size()) {
                 res.status = 400;
@@ -224,6 +347,9 @@ void RunHTTPServer() {
 
             WriteLog("Storing CID=" + cid + " with " + std::to_string(hashes.size()) + " chunks");
 
+            std::string content_hash = computeContentHash(chunksB64);
+            UpdateContentReference(content_hash);
+
             for (size_t i = 0; i < hashes.size(); ++i) {
                 int    index = static_cast<int>(i) + 1;
                 auto   raw   = base64_decode(chunksB64[i]);
@@ -231,14 +357,14 @@ void RunHTTPServer() {
                     WriteLog("Decode failed for chunk " + std::to_string(i));
                     continue;
                 }
-                // write out file
                 std::string path = CHUNK_DIR + "\\" + cid + "_chunk" + std::to_string(index) + ".bin";
                 std::ofstream ofs(path, std::ios::binary);
                 ofs.write(raw.data(), raw.size());
                 ofs.close();
-                // insert metadata
                 InsertChunkMetadata(cid, index, path);
             }
+
+            InsertFileMetadata(cid, original_filename);
 
             res.status = 200;
             res.set_content("Success", "text/plain");
@@ -258,7 +384,6 @@ void RunHTTPServer() {
         std::string cid = req.path_params.at("cid");
         WriteLog("GET /file/" + cid + " received");
         
-        // Get all chunk paths for this CID
         auto chunks = GetChunkPathsByCID(cid);
         
         if (chunks.empty()) {
@@ -270,9 +395,15 @@ void RunHTTPServer() {
         
         WriteLog("Found " + std::to_string(chunks.size()) + " chunks for CID: " + cid);
         
-        // Prepare JSON response with chunk data
+        std::string original_filename = GetOriginalFilename(cid);
+        if (original_filename.empty()) {
+            WriteLog("No metadata found for CID: " + cid);
+            original_filename = "file-" + cid;
+        }
+
         json response;
         response["cid"] = cid;
+        response["original_filename"] = original_filename;
         response["chunks"] = json::array();
         
         for (const auto& [index, path] : chunks) {
@@ -282,7 +413,6 @@ void RunHTTPServer() {
                 continue;
             }
             
-            // Base64 encode the chunk
             BIO* b64 = BIO_new(BIO_f_base64());
             BIO* bmem = BIO_new(BIO_s_mem());
             BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
@@ -297,7 +427,6 @@ void RunHTTPServer() {
             std::string encodedChunk(bptr->data, bptr->length);
             BIO_free_all(b64);
             
-            // Add to response
             json chunkObj;
             chunkObj["index"] = index;
             chunkObj["data"] = encodedChunk;
@@ -318,9 +447,6 @@ void RunHTTPServer() {
     WriteLog("HTTP server stopped");
 }
 
-// ----------------------------------------------------------------------------
-// Windows Service plumbing
-// ----------------------------------------------------------------------------
 void WINAPI ServiceCtrlHandler(DWORD code) {
     if (code == SERVICE_CONTROL_STOP) {
         WriteLog("Service stopping...");
@@ -361,7 +487,6 @@ int main() {
         { nullptr, nullptr }
     };
     if (!StartServiceCtrlDispatcher(table)) {
-        // run as console
         running = true;
         RunHTTPServer();
     }
