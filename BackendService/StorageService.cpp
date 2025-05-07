@@ -437,7 +437,6 @@ void RunHTTPServer() {
         res.set_content(file_data, "application/octet-stream");
     });
 
-    // Update Endpoint
     server.Post("/update", [](const httplib::Request& req, httplib::Response& res) {
         try {
             json payload = json::parse(req.body);
@@ -445,6 +444,7 @@ void RunHTTPServer() {
             std::string new_cid = payload.at("new_cid").get<std::string>();
             auto new_hashes = payload.at("new_chunks").get<std::vector<std::string>>();
             auto new_data_b64 = payload.at("new_data").get<std::vector<std::string>>();
+            std::string new_filename = payload.at("new_filename").get<std::string>();
 
             if (new_hashes.size() != new_data_b64.size()) {
                 res.status = 400;
@@ -557,13 +557,12 @@ void RunHTTPServer() {
                 }
             }
 
-            // Insert new metadata
-            std::string filename = GetOriginalFilename(old_cid, db);
+            // Insert new metadata with new filename
             const char* sql_insert_meta = "INSERT INTO file_metadata (cid, original_filename) VALUES (?, ?);";
             sqlite3_stmt* stmt_insert_meta;
             if (sqlite3_prepare_v2(db, sql_insert_meta, -1, &stmt_insert_meta, nullptr) == SQLITE_OK) {
                 sqlite3_bind_text(stmt_insert_meta, 1, new_cid.c_str(), -1, SQLITE_STATIC);
-                sqlite3_bind_text(stmt_insert_meta, 2, filename.c_str(), -1, SQLITE_STATIC);
+                sqlite3_bind_text(stmt_insert_meta, 2, new_filename.c_str(), -1, SQLITE_STATIC);
                 sqlite3_step(stmt_insert_meta);
                 sqlite3_finalize(stmt_insert_meta);
             }
@@ -596,7 +595,7 @@ void RunHTTPServer() {
             res.set_content("Server error", "text/plain");
         }
     });
-
+    
     // Delete Endpoint
     server.Delete("/file/:cid", [](const httplib::Request& req, httplib::Response& res) {
         std::string cid = req.path_params.at("cid");

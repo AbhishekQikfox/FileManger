@@ -440,12 +440,13 @@ void RunServer() {
         // Generate new CID
         std::string new_cid = generateCID(new_chunk_hashes);
 
-        // Send to backend
+        // Send to backend with new filename
         json payload;
         payload["old_cid"] = old_cid;
         payload["new_cid"] = new_cid;
         payload["new_chunks"] = new_chunk_hashes;
         payload["new_data"] = new_encoded_chunks;
+        payload["new_filename"] = file.filename; // Add the new filename
 
         std::string json_str = payload.dump();
         httplib::Client client(BACKEND_HOST, BACKEND_PORT);

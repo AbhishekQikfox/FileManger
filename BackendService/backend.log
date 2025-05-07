@@ -188,3 +188,8 @@ Wed May  7 10:17:12 2025 - Database initialized (file_chunks, chunk_references, 
 Wed May  7 10:17:12 2025 - StorageService starting HTTP on port 8081
 Wed May  7 10:23:14 2025 - Database initialized (file_chunks, chunk_references, file_metadata).
 Wed May  7 10:23:14 2025 - StorageService starting HTTP on port 8081
+Wed May  7 10:50:50 2025 - Database initialized (file_chunks, chunk_references, file_metadata).
+Wed May  7 10:50:50 2025 - StorageService starting HTTP on port 8081
+Wed May  7 10:54:00 2025 - POST /store received, Content-Length=2796494
+Wed May  7 10:54:00 2025 - Storing CID=9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_f5c3200d6076e241 with 2 chunks
+Wed May  7 10:54:00 2025 - Updated reference counts for 2 chunks for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_f5c3200d6076e241
