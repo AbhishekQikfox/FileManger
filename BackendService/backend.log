@@ -108,3 +108,81 @@ Tue May  6 18:09:52 2025 - Successfully sent file data for CID: 9d2a08a033d22e99
 Tue May  6 18:09:55 2025 - GET /file/9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_e958c476babeb043 received
 Tue May  6 18:09:55 2025 - Found 2 chunks for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_e958c476babeb043
 Tue May  6 18:09:55 2025 - Successfully sent file data for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_e958c476babeb043
+Tue May  6 18:25:31 2025 - Service stopping...
+Tue May  6 18:25:31 2025 - HTTP server stopped
+Tue May  6 18:26:55 2025 - Database initialized (file_chunks, chunk_references, file_metadata).
+Tue May  6 18:26:55 2025 - StorageService starting HTTP on port 8081
+Tue May  6 18:27:51 2025 - POST /store received, Content-Length=3496301
+Tue May  6 18:27:51 2025 - Storing CID=93abb34e0efa37b8f502b8686aa8fbc7771d99edadd957341c87b155977d54d6_30c00d1f126e0ce8 with 3 chunks
+Tue May  6 18:27:51 2025 - Updated reference counts for 3 chunks for CID: 93abb34e0efa37b8f502b8686aa8fbc7771d99edadd957341c87b155977d54d6_30c00d1f126e0ce8
+Tue May  6 18:33:41 2025 - POST /store received, Content-Length=4194668
+Tue May  6 18:33:41 2025 - Storing CID=d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_6f679ed196c7a195 with 3 chunks
+Tue May  6 18:33:41 2025 - Failed to prepare SELECT for hash: 5ae9782017a68037004b2bf806c77d324db4d915ed3725d84eb3121b2ad16061
+Tue May  6 18:33:41 2025 - Failed to prepare INSERT for hash: 5ae9782017a68037004b2bf806c77d324db4d915ed3725d84eb3121b2ad16061
+Tue May  6 18:33:41 2025 - Failed to prepare file_chunks INSERT for CID: d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_6f679ed196c7a195
+Tue May  6 18:33:41 2025 - Failed to prepare SELECT for hash: 4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56
+Tue May  6 18:33:41 2025 - Failed to prepare INSERT for hash: 4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56
+Tue May  6 18:33:41 2025 - Failed to prepare file_chunks INSERT for CID: d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_6f679ed196c7a195
+Tue May  6 18:33:41 2025 - Failed to prepare SELECT for hash: 4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56
+Tue May  6 18:33:41 2025 - Failed to prepare INSERT for hash: 4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56
+Tue May  6 18:33:41 2025 - Failed to prepare file_chunks INSERT for CID: d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_6f679ed196c7a195
+Tue May  6 18:33:41 2025 - Failed to prepare file_metadata INSERT
+Tue May  6 18:33:41 2025 - Updated reference counts for 3 chunks for CID: d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_6f679ed196c7a195
+Tue May  6 18:34:52 2025 - POST /store received, Content-Length=3496301
+Tue May  6 18:34:52 2025 - Storing CID=93abb34e0efa37b8f502b8686aa8fbc7771d99edadd957341c87b155977d54d6_86527566012c8e88 with 3 chunks
+Tue May  6 18:34:52 2025 - Failed to prepare SELECT for hash: e258a491b361c73d4e8b71c8979ca7dddd9da1e32dc14b0ef40cc4ee25d36f6c
+Tue May  6 18:34:52 2025 - Failed to prepare INSERT for hash: e258a491b361c73d4e8b71c8979ca7dddd9da1e32dc14b0ef40cc4ee25d36f6c
+Tue May  6 18:34:52 2025 - Failed to prepare file_chunks INSERT for CID: 93abb34e0efa37b8f502b8686aa8fbc7771d99edadd957341c87b155977d54d6_86527566012c8e88
+Tue May  6 18:34:52 2025 - Failed to prepare SELECT for hash: 581c37049b23e2efdf56edc980105e7f7af8305dce8a1238c0934f85e5e962f3
+Tue May  6 18:34:52 2025 - Failed to prepare INSERT for hash: 581c37049b23e2efdf56edc980105e7f7af8305dce8a1238c0934f85e5e962f3
+Tue May  6 18:34:52 2025 - Failed to prepare file_chunks INSERT for CID: 93abb34e0efa37b8f502b8686aa8fbc7771d99edadd957341c87b155977d54d6_86527566012c8e88
+Tue May  6 18:34:52 2025 - Failed to prepare SELECT for hash: 99e4ce59c324f3e8bb3d8d83014fc54f4e7ec874ae1f37ceb1c7df1cfa09f780
+Tue May  6 18:34:52 2025 - Failed to prepare INSERT for hash: 99e4ce59c324f3e8bb3d8d83014fc54f4e7ec874ae1f37ceb1c7df1cfa09f780
+Tue May  6 18:34:52 2025 - Failed to prepare file_chunks INSERT for CID: 93abb34e0efa37b8f502b8686aa8fbc7771d99edadd957341c87b155977d54d6_86527566012c8e88
+Tue May  6 18:34:52 2025 - Failed to prepare file_metadata INSERT
+Tue May  6 18:34:52 2025 - Updated reference counts for 3 chunks for CID: 93abb34e0efa37b8f502b8686aa8fbc7771d99edadd957341c87b155977d54d6_86527566012c8e88
+Tue May  6 18:36:56 2025 - Database initialized (file_chunks, chunk_references, file_metadata).
+Tue May  6 18:36:56 2025 - StorageService starting HTTP on port 8081
+Tue May  6 18:37:44 2025 - POST /store received, Content-Length=3496301
+Tue May  6 18:37:44 2025 - Storing CID=93abb34e0efa37b8f502b8686aa8fbc7771d99edadd957341c87b155977d54d6_fb628d4cf6010b83 with 3 chunks
+Tue May  6 18:37:44 2025 - Updated reference counts for 3 chunks for CID: 93abb34e0efa37b8f502b8686aa8fbc7771d99edadd957341c87b155977d54d6_fb628d4cf6010b83
+Tue May  6 18:39:09 2025 - POST /store received, Content-Length=4194668
+Tue May  6 18:39:09 2025 - Storing CID=d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_a389fa5a2f979f76 with 3 chunks
+Tue May  6 18:39:09 2025 - Updated reference counts for 3 chunks for CID: d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_a389fa5a2f979f76
+Tue May  6 18:39:13 2025 - POST /store received, Content-Length=2796494
+Tue May  6 18:39:13 2025 - Storing CID=9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_54cb56bdd5c6a5da with 2 chunks
+Tue May  6 18:39:13 2025 - Updated reference counts for 2 chunks for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_54cb56bdd5c6a5da
+Tue May  6 18:39:53 2025 - POST /store received, Content-Length=2796494
+Tue May  6 18:39:53 2025 - Storing CID=9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_c5a67589bcfb277b with 2 chunks
+Tue May  6 18:39:53 2025 - Updated reference counts for 2 chunks for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_c5a67589bcfb277b
+Wed May  7 10:09:15 2025 - Database initialized (file_chunks, chunk_references, file_metadata).
+Wed May  7 10:09:15 2025 - StorageService starting HTTP on port 8081
+Wed May  7 10:09:59 2025 - GET /file/9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_54cb56bdd5c6a5da received
+Wed May  7 10:09:59 2025 - Found original filename: file_2mb.txt for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_54cb56bdd5c6a5da
+Wed May  7 10:09:59 2025 - Found 2 chunks for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_54cb56bdd5c6a5da
+Wed May  7 10:09:59 2025 - Successfully read 1048576 bytes from C:\Users\Training\Desktop\ProjectRoot\BackendService\Chunks\4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56.bin
+Wed May  7 10:09:59 2025 - Successfully read 1048576 bytes from C:\Users\Training\Desktop\ProjectRoot\BackendService\Chunks\4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56.bin
+Wed May  7 10:09:59 2025 - Sending response with 2 chunks
+Wed May  7 10:10:03 2025 - GET /file/9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_54cb56bdd5c6a5da received
+Wed May  7 10:10:03 2025 - Found original filename: file_2mb.txt for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_54cb56bdd5c6a5da
+Wed May  7 10:10:03 2025 - Found 2 chunks for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_54cb56bdd5c6a5da
+Wed May  7 10:10:03 2025 - Successfully read 1048576 bytes from C:\Users\Training\Desktop\ProjectRoot\BackendService\Chunks\4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56.bin
+Wed May  7 10:10:03 2025 - Successfully read 1048576 bytes from C:\Users\Training\Desktop\ProjectRoot\BackendService\Chunks\4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56.bin
+Wed May  7 10:10:03 2025 - Sending response with 2 chunks
+Wed May  7 10:10:15 2025 - POST /store received, Content-Length=2796494
+Wed May  7 10:10:15 2025 - Storing CID=9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_770ce31a0ad26c83 with 2 chunks
+Wed May  7 10:10:15 2025 - Updated reference counts for 2 chunks for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_770ce31a0ad26c83
+Wed May  7 10:10:29 2025 - GET /file/9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_770ce31a0ad26c83 received
+Wed May  7 10:10:29 2025 - Found original filename: file_2mb.txt for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_770ce31a0ad26c83
+Wed May  7 10:10:29 2025 - Found 2 chunks for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_770ce31a0ad26c83
+Wed May  7 10:10:29 2025 - Successfully read 1048576 bytes from C:\Users\Training\Desktop\ProjectRoot\BackendService\Chunks\4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56.bin
+Wed May  7 10:10:29 2025 - Successfully read 1048576 bytes from C:\Users\Training\Desktop\ProjectRoot\BackendService\Chunks\4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56.bin
+Wed May  7 10:10:29 2025 - Sending response with 2 chunks
+Wed May  7 10:10:52 2025 - GET /file/9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_770ce31a0ad26c83 received
+Wed May  7 10:10:52 2025 - Found original filename: file_2mb.txt for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_770ce31a0ad26c83
+Wed May  7 10:10:52 2025 - Found 2 chunks for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_770ce31a0ad26c83
+Wed May  7 10:10:52 2025 - Successfully read 1048576 bytes from C:\Users\Training\Desktop\ProjectRoot\BackendService\Chunks\4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56.bin
+Wed May  7 10:10:52 2025 - Successfully read 1048576 bytes from C:\Users\Training\Desktop\ProjectRoot\BackendService\Chunks\4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56.bin
+Wed May  7 10:10:53 2025 - Sending response with 2 chunks
+Wed May  7 10:17:12 2025 - Database initialized (file_chunks, chunk_references, file_metadata).
+Wed May  7 10:17:12 2025 - StorageService starting HTTP on port 8081

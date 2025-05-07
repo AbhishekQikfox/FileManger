@@ -190,33 +190,68 @@ std::pair<std::vector<char>, std::string> GetFileFromBackend(const std::string& 
     
     auto res = client.Get(BACKEND_FILE_ENDPOINT + "/" + cid);
     
-    if (!res || res->status != 200) {
-        WriteLog("Failed to connect or retrieve from backend: " + (res ? std::to_string(res->status) : "No response"));
+    if (!res) {
+        WriteLog("Failed to connect to backend service");
+        return {{}, ""};
+    }
+    
+    if (res->status != 200) {
+        WriteLog("Backend service returned error: " + std::to_string(res->status) + " - " + res->body);
         return {{}, ""};
     }
     
     try {
         json response = json::parse(res->body);
-        std::string original_filename = response.value("original_filename", "");
         
-        std::vector<std::pair<int, std::string>> chunks;
-        for (const auto& chunk : response["chunks"]) {
-            int index = chunk["index"];
-            std::string data = chunk["data"];
-            chunks.emplace_back(index, data);
+        if (!response.contains("original_filename") || !response.contains("chunks")) {
+            WriteLog("Backend response missing required fields");
+            return {{}, ""};
         }
         
+        std::string original_filename = response["original_filename"];
+        WriteLog("Original filename: " + original_filename);
+        
+        std::vector<std::pair<int, std::vector<char>>> chunks;
+        
+        // Parse and collect all chunks
+        for (const auto& chunk : response["chunks"]) {
+            if (!chunk.contains("index") || !chunk.contains("data")) {
+                WriteLog("Chunk missing required fields");
+                continue;
+            }
+            
+            int index = chunk["index"];
+            std::string data = chunk["data"];
+            auto decodedData = base64Decode(data);
+            
+            if (decodedData.empty()) {
+                WriteLog("Failed to decode chunk data for index: " + std::to_string(index));
+                continue;
+            }
+            
+            chunks.emplace_back(index, decodedData);
+            WriteLog("Decoded chunk " + std::to_string(index) + " (" + std::to_string(decodedData.size()) + " bytes)");
+        }
+        
+        // Sort chunks by index
         std::sort(chunks.begin(), chunks.end(), [](const auto& a, const auto& b) {
             return a.first < b.first;
         });
         
+        // Combine chunks into single file data
         std::vector<char> fileData;
-        for (const auto& [index, encodedData] : chunks) {
-            auto chunkData = base64Decode(encodedData);
-            fileData.insert(fileData.end(), chunkData.begin(), chunkData.end());
+        size_t totalSize = 0;
+        for (const auto& [index, data] : chunks) {
+            totalSize += data.size();
         }
         
-        WriteLog("Successfully retrieved file with CID: " + cid + " (" + std::to_string(fileData.size()) + " bytes)");
+        fileData.reserve(totalSize);
+        
+        for (const auto& [index, data] : chunks) {
+            fileData.insert(fileData.end(), data.begin(), data.end());
+        }
+        
+        WriteLog("Successfully assembled file with CID: " + cid + " (" + std::to_string(fileData.size()) + " bytes)");
         return {fileData, original_filename};
         
     } catch (const std::exception& e) {
@@ -224,7 +259,6 @@ std::pair<std::vector<char>, std::string> GetFileFromBackend(const std::string& 
         return {{}, ""};
     }
 }
-
 bool SendToBackendHTTP(const std::string& jsonPayload) {
     WriteLog("Connecting to backend service at " + BACKEND_HOST + ":" + std::to_string(BACKEND_PORT));
     
@@ -366,30 +400,19 @@ void RunServer() {
 
     server.Get("/files/:cid", [](const httplib::Request& req, httplib::Response& res) {
         std::string cid = req.path_params.at("cid");
-        WriteLog("Received request for file with CID: " + cid);
-        
-        auto [fileData, original_filename] = GetFileFromBackend(cid);
-        
-        if (fileData.empty()) {
-            res.status = 404;
-            res.set_content("File not found", "text/plain");
-            WriteLog("File with CID: " + cid + " not found");
-            return;
+        httplib::Client client(BACKEND_HOST, BACKEND_PORT);
+        auto backend_res = client.Get("/file/" + cid);
+
+        if (backend_res && backend_res->status == 200) {
+            res.status = 200;
+            res.set_header("Content-Disposition", backend_res->get_header_value("Content-Disposition"));
+            res.set_content(backend_res->body, "application/octet-stream");
+        } else {
+            res.status = backend_res ? backend_res->status : 500;
+            res.set_content("Download failed", "text/plain");
         }
-        
-        if (original_filename.empty()) {
-            original_filename = "file-" + cid;
-            WriteLog("No original filename found for CID: " + cid + ", using default");
-        }
-        
-        res.set_header("Content-Type", "application/octet-stream");
-        res.set_header("Content-Disposition", "attachment; filename=\"" + original_filename + "\"");
-        
-        res.body.assign(fileData.begin(), fileData.end());
-        res.status = 200;
-        
-        WriteLog("Successfully served file with CID: " + cid + " as " + original_filename);
     });
+
 
     {
         std::lock_guard<std::mutex> lock(serverMutex);
