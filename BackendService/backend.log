@@ -186,3 +186,5 @@ Wed May  7 10:10:52 2025 - Successfully read 1048576 bytes from C:\Users\Trainin
 Wed May  7 10:10:53 2025 - Sending response with 2 chunks
 Wed May  7 10:17:12 2025 - Database initialized (file_chunks, chunk_references, file_metadata).
 Wed May  7 10:17:12 2025 - StorageService starting HTTP on port 8081
+Wed May  7 10:23:14 2025 - Database initialized (file_chunks, chunk_references, file_metadata).
+Wed May  7 10:23:14 2025 - StorageService starting HTTP on port 8081

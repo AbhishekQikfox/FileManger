@@ -437,6 +437,255 @@ void RunHTTPServer() {
         res.set_content(file_data, "application/octet-stream");
     });
 
+    // Update Endpoint
+    server.Post("/update", [](const httplib::Request& req, httplib::Response& res) {
+        try {
+            json payload = json::parse(req.body);
+            std::string old_cid = payload.at("old_cid").get<std::string>();
+            std::string new_cid = payload.at("new_cid").get<std::string>();
+            auto new_hashes = payload.at("new_chunks").get<std::vector<std::string>>();
+            auto new_data_b64 = payload.at("new_data").get<std::vector<std::string>>();
+
+            if (new_hashes.size() != new_data_b64.size()) {
+                res.status = 400;
+                res.set_content("Chunks/data size mismatch", "text/plain");
+                return;
+            }
+
+            sqlite3* db = nullptr;
+            if (sqlite3_open(DB_PATH.c_str(), &db) != SQLITE_OK) {
+                res.status = 500;
+                res.set_content("Database error", "text/plain");
+                return;
+            }
+
+            sqlite3_exec(db, "BEGIN;", nullptr, nullptr, nullptr);
+
+            // Get old chunk hashes
+            std::vector<std::string> old_chunks;
+            const char* sql_select_old = "SELECT hash FROM file_chunks WHERE cid = ? ORDER BY chunk_index;";
+            sqlite3_stmt* stmt_select_old;
+            if (sqlite3_prepare_v2(db, sql_select_old, -1, &stmt_select_old, nullptr) == SQLITE_OK) {
+                sqlite3_bind_text(stmt_select_old, 1, old_cid.c_str(), -1, SQLITE_STATIC);
+                while (sqlite3_step(stmt_select_old) == SQLITE_ROW) {
+                    const char* hash = reinterpret_cast<const char*>(sqlite3_column_text(stmt_select_old, 0));
+                    old_chunks.push_back(hash);
+                }
+                sqlite3_finalize(stmt_select_old);
+            }
+
+            if (old_chunks.empty()) {
+                sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
+                sqlite3_close(db);
+                res.status = 404;
+                res.set_content("CID not found", "text/plain");
+                return;
+            }
+
+            // Check if identical
+            if (old_chunks == new_hashes) {
+                sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
+                sqlite3_close(db);
+                res.status = 400;
+                res.set_content("File identical - no changes required", "text/plain");
+                return;
+            }
+
+            // Decrement old chunks ref_counts
+            for (const auto& hash : old_chunks) {
+                const char* sql_decrement = "UPDATE chunk_references SET ref_count = ref_count - 1 WHERE hash = ?;";
+                sqlite3_stmt* stmt_decrement;
+                if (sqlite3_prepare_v2(db, sql_decrement, -1, &stmt_decrement, nullptr) == SQLITE_OK) {
+                    sqlite3_bind_text(stmt_decrement, 1, hash.c_str(), -1, SQLITE_STATIC);
+                    sqlite3_step(stmt_decrement);
+                    sqlite3_finalize(stmt_decrement);
+                }
+            }
+
+            // Handle new chunks: increment ref_counts and save if new
+            for (size_t i = 0; i < new_hashes.size(); ++i) {
+                std::string hash = new_hashes[i];
+                std::string data_b64 = new_data_b64[i];
+                auto raw_data = base64_decode(data_b64);
+
+                int ref_count = 0;
+                const char* sql_select_ref = "SELECT ref_count FROM chunk_references WHERE hash = ?;";
+                sqlite3_stmt* stmt_select_ref;
+                if (sqlite3_prepare_v2(db, sql_select_ref, -1, &stmt_select_ref, nullptr) == SQLITE_OK) {
+                    sqlite3_bind_text(stmt_select_ref, 1, hash.c_str(), -1, SQLITE_STATIC);
+                    if (sqlite3_step(stmt_select_ref) == SQLITE_ROW) {
+                        ref_count = sqlite3_column_int(stmt_select_ref, 0);
+                    }
+                    sqlite3_finalize(stmt_select_ref);
+                }
+
+                if (ref_count > 0) {
+                    const char* sql_increment = "UPDATE chunk_references SET ref_count = ref_count + 1 WHERE hash = ?;";
+                    sqlite3_stmt* stmt_increment;
+                    if (sqlite3_prepare_v2(db, sql_increment, -1, &stmt_increment, nullptr) == SQLITE_OK) {
+                        sqlite3_bind_text(stmt_increment, 1, hash.c_str(), -1, SQLITE_STATIC);
+                        sqlite3_step(stmt_increment);
+                        sqlite3_finalize(stmt_increment);
+                    }
+                } else {
+                    const char* sql_insert = "INSERT INTO chunk_references (hash, ref_count) VALUES (?, 1);";
+                    sqlite3_stmt* stmt_insert;
+                    if (sqlite3_prepare_v2(db, sql_insert, -1, &stmt_insert, nullptr) == SQLITE_OK) {
+                        sqlite3_bind_text(stmt_insert, 1, hash.c_str(), -1, SQLITE_STATIC);
+                        sqlite3_step(stmt_insert);
+                        sqlite3_finalize(stmt_insert);
+                    }
+                    std::string path = CHUNK_DIR + "/" + hash + ".bin";
+                    std::ofstream ofs(path, std::ios::binary);
+                    if (ofs) {
+                        ofs.write(raw_data.data(), raw_data.size());
+                        ofs.close();
+                    }
+                }
+            }
+
+            // Insert new file_chunks
+            for (size_t i = 0; i < new_hashes.size(); ++i) {
+                const char* sql_insert_chunk = "INSERT INTO file_chunks (cid, chunk_index, hash) VALUES (?, ?, ?);";
+                sqlite3_stmt* stmt_insert_chunk;
+                if (sqlite3_prepare_v2(db, sql_insert_chunk, -1, &stmt_insert_chunk, nullptr) == SQLITE_OK) {
+                    sqlite3_bind_text(stmt_insert_chunk, 1, new_cid.c_str(), -1, SQLITE_STATIC);
+                    sqlite3_bind_int(stmt_insert_chunk, 2, static_cast<int>(i) + 1);
+                    sqlite3_bind_text(stmt_insert_chunk, 3, new_hashes[i].c_str(), -1, SQLITE_STATIC);
+                    sqlite3_step(stmt_insert_chunk);
+                    sqlite3_finalize(stmt_insert_chunk);
+                }
+            }
+
+            // Insert new metadata
+            std::string filename = GetOriginalFilename(old_cid, db);
+            const char* sql_insert_meta = "INSERT INTO file_metadata (cid, original_filename) VALUES (?, ?);";
+            sqlite3_stmt* stmt_insert_meta;
+            if (sqlite3_prepare_v2(db, sql_insert_meta, -1, &stmt_insert_meta, nullptr) == SQLITE_OK) {
+                sqlite3_bind_text(stmt_insert_meta, 1, new_cid.c_str(), -1, SQLITE_STATIC);
+                sqlite3_bind_text(stmt_insert_meta, 2, filename.c_str(), -1, SQLITE_STATIC);
+                sqlite3_step(stmt_insert_meta);
+                sqlite3_finalize(stmt_insert_meta);
+            }
+
+            // Delete old file_chunks and metadata
+            const char* sql_delete_chunks = "DELETE FROM file_chunks WHERE cid = ?;";
+            sqlite3_stmt* stmt_delete_chunks;
+            if (sqlite3_prepare_v2(db, sql_delete_chunks, -1, &stmt_delete_chunks, nullptr) == SQLITE_OK) {
+                sqlite3_bind_text(stmt_delete_chunks, 1, old_cid.c_str(), -1, SQLITE_STATIC);
+                sqlite3_step(stmt_delete_chunks);
+                sqlite3_finalize(stmt_delete_chunks);
+            }
+
+            const char* sql_delete_meta = "DELETE FROM file_metadata WHERE cid = ?;";
+            sqlite3_stmt* stmt_delete_meta;
+            if (sqlite3_prepare_v2(db, sql_delete_meta, -1, &stmt_delete_meta, nullptr) == SQLITE_OK) {
+                sqlite3_bind_text(stmt_delete_meta, 1, old_cid.c_str(), -1, SQLITE_STATIC);
+                sqlite3_step(stmt_delete_meta);
+                sqlite3_finalize(stmt_delete_meta);
+            }
+
+            sqlite3_exec(db, "COMMIT;", nullptr, nullptr, nullptr);
+            sqlite3_close(db);
+
+            res.status = 200;
+            res.set_content(new_cid, "text/plain");
+        } catch (const std::exception& e) {
+            WriteLog("Update error: " + std::string(e.what()));
+            res.status = 500;
+            res.set_content("Server error", "text/plain");
+        }
+    });
+
+    // Delete Endpoint
+    server.Delete("/file/:cid", [](const httplib::Request& req, httplib::Response& res) {
+        std::string cid = req.path_params.at("cid");
+        sqlite3* db = nullptr;
+        if (sqlite3_open(DB_PATH.c_str(), &db) != SQLITE_OK) {
+            res.status = 500;
+            res.set_content("Database error", "text/plain");
+            return;
+        }
+
+        sqlite3_exec(db, "BEGIN;", nullptr, nullptr, nullptr);
+
+        std::vector<std::string> chunks;
+        const char* sql_select_chunks = "SELECT hash FROM file_chunks WHERE cid = ?;";
+        sqlite3_stmt* stmt_select_chunks;
+        if (sqlite3_prepare_v2(db, sql_select_chunks, -1, &stmt_select_chunks, nullptr) == SQLITE_OK) {
+            sqlite3_bind_text(stmt_select_chunks, 1, cid.c_str(), -1, SQLITE_STATIC);
+            while (sqlite3_step(stmt_select_chunks) == SQLITE_ROW) {
+                const char* hash = reinterpret_cast<const char*>(sqlite3_column_text(stmt_select_chunks, 0));
+                chunks.push_back(hash);
+            }
+            sqlite3_finalize(stmt_select_chunks);
+        }
+
+        if (chunks.empty()) {
+            sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
+            sqlite3_close(db);
+            res.status = 404;
+            res.set_content("File not found", "text/plain");
+            return;
+        }
+
+        const char* sql_delete_chunks = "DELETE FROM file_chunks WHERE cid = ?;";
+        sqlite3_stmt* stmt_delete_chunks;
+        if (sqlite3_prepare_v2(db, sql_delete_chunks, -1, &stmt_delete_chunks, nullptr) == SQLITE_OK) {
+            sqlite3_bind_text(stmt_delete_chunks, 1, cid.c_str(), -1, SQLITE_STATIC);
+            sqlite3_step(stmt_delete_chunks);
+            sqlite3_finalize(stmt_delete_chunks);
+        }
+
+        const char* sql_delete_meta = "DELETE FROM file_metadata WHERE cid = ?;";
+        sqlite3_stmt* stmt_delete_meta;
+        if (sqlite3_prepare_v2(db, sql_delete_meta, -1, &stmt_delete_meta, nullptr) == SQLITE_OK) {
+            sqlite3_bind_text(stmt_delete_meta, 1, cid.c_str(), -1, SQLITE_STATIC);
+            sqlite3_step(stmt_delete_meta);
+            sqlite3_finalize(stmt_delete_meta);
+        }
+
+        for (const auto& hash : chunks) {
+            const char* sql_decrement = "UPDATE chunk_references SET ref_count = ref_count - 1 WHERE hash = ?;";
+            sqlite3_stmt* stmt_decrement;
+            if (sqlite3_prepare_v2(db, sql_decrement, -1, &stmt_decrement, nullptr) == SQLITE_OK) {
+                sqlite3_bind_text(stmt_decrement, 1, hash.c_str(), -1, SQLITE_STATIC);
+                sqlite3_step(stmt_decrement);
+                sqlite3_finalize(stmt_decrement);
+            }
+
+            int ref_count = 0;
+            const char* sql_select_ref = "SELECT ref_count FROM chunk_references WHERE hash = ?;";
+            sqlite3_stmt* stmt_select_ref;
+            if (sqlite3_prepare_v2(db, sql_select_ref, -1, &stmt_select_ref, nullptr) == SQLITE_OK) {
+                sqlite3_bind_text(stmt_select_ref, 1, hash.c_str(), -1, SQLITE_STATIC);
+                if (sqlite3_step(stmt_select_ref) == SQLITE_ROW) {
+                    ref_count = sqlite3_column_int(stmt_select_ref, 0);
+                }
+                sqlite3_finalize(stmt_select_ref);
+            }
+
+            if (ref_count <= 0) {
+                std::string path = CHUNK_DIR + "/" + hash + ".bin";
+                fs::remove(path);
+                const char* sql_delete_chunk = "DELETE FROM chunk_references WHERE hash = ?;";
+                sqlite3_stmt* stmt_delete_chunk;
+                if (sqlite3_prepare_v2(db, sql_delete_chunk, -1, &stmt_delete_chunk, nullptr) == SQLITE_OK) {
+                    sqlite3_bind_text(stmt_delete_chunk, 1, hash.c_str(), -1, SQLITE_STATIC);
+                    sqlite3_step(stmt_delete_chunk);
+                    sqlite3_finalize(stmt_delete_chunk);
+                }
+            }
+        }
+
+        sqlite3_exec(db, "COMMIT;", nullptr, nullptr, nullptr);
+        sqlite3_close(db);
+
+        res.status = 200;
+        res.set_content("Deleted", "text/plain");
+    });
+
+
     // Service control and server running logic (unchanged)
     serverPtr = &server;
     {

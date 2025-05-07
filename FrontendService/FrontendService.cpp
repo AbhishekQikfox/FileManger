@@ -413,6 +413,68 @@ void RunServer() {
         }
     });
 
+    server.Put("/update/:cid", [](const httplib::Request& req, httplib::Response& res) {
+        std::string old_cid = req.path_params.at("cid");
+        if (!req.has_file("file")) {
+            res.status = 400;
+            res.set_content("Missing 'file' in update", "text/plain");
+            return;
+        }
+        const auto& file = req.get_file_value("file");
+        std::vector<char> new_data(file.content.begin(), file.content.end());
+
+        // Chunk and hash new data
+        std::vector<std::string> new_chunk_hashes;
+        std::vector<std::string> new_encoded_chunks;
+        size_t offset = 0;
+        while (offset < new_data.size()) {
+            size_t len = std::min(static_cast<size_t>(CHUNK_SIZE), new_data.size() - offset);
+            std::vector<char> chunk(new_data.begin() + offset, new_data.begin() + offset + len);
+            std::string hash = computeHash(chunk);
+            new_chunk_hashes.push_back(hash);
+            std::string encoded = base64Encode(chunk);
+            new_encoded_chunks.push_back(encoded);
+            offset += len;
+        }
+
+        // Generate new CID
+        std::string new_cid = generateCID(new_chunk_hashes);
+
+        // Send to backend
+        json payload;
+        payload["old_cid"] = old_cid;
+        payload["new_cid"] = new_cid;
+        payload["new_chunks"] = new_chunk_hashes;
+        payload["new_data"] = new_encoded_chunks;
+
+        std::string json_str = payload.dump();
+        httplib::Client client(BACKEND_HOST, BACKEND_PORT);
+        auto backend_res = client.Post("/update", json_str, "application/json");
+
+        if (backend_res && backend_res->status == 200) {
+            res.status = 200;
+            res.set_content(backend_res->body, "text/plain");
+        } else {
+            res.status = backend_res ? backend_res->status : 500;
+            res.set_content("Update failed", "text/plain");
+        }
+    });
+
+    server.Delete("/files/:cid", [](const httplib::Request& req, httplib::Response& res) {
+        std::string cid = req.path_params.at("cid");
+        httplib::Client client(BACKEND_HOST, BACKEND_PORT);
+        auto backend_res = client.Delete("/file/" + cid);
+
+        if (backend_res && backend_res->status == 200) {
+            res.status = 200;
+            res.set_content("Deleted", "text/plain");
+        } else {
+            res.status = backend_res ? backend_res->status : 500;
+            res.set_content("Delete failed", "text/plain");
+        }
+    });
+
+
 
     {
         std::lock_guard<std::mutex> lock(serverMutex);
