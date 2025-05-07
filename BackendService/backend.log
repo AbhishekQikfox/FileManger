@@ -1,211 +1,116 @@
-Tue May  6 15:03:18 2025 - Server thread started
-Tue May  6 15:03:18 2025 - ObjectStore service started. Database initialized.
-Tue May  6 15:03:18 2025 - Pipe created. Waiting for connection...
-Tue May  6 15:03:38 2025 - Client connected to pipe immediately.
-Tue May  6 15:03:38 2025 - ReadFile failed with error: 109
-Tue May  6 15:03:38 2025 - No data received from pipe.
-Tue May  6 15:03:38 2025 - Pipe created. Waiting for connection...
-Tue May  6 15:07:22 2025 - Client connected to pipe immediately.
-Tue May  6 15:07:22 2025 - ReadFile failed with error: 109
-Tue May  6 15:07:22 2025 - No data received from pipe.
-Tue May  6 15:07:22 2025 - Pipe created. Waiting for connection...
-Tue May  6 15:08:35 2025 - Client connected to pipe immediately.
-Tue May  6 15:08:35 2025 - ReadFile failed with error: 109
-Tue May  6 15:08:35 2025 - No data received from pipe.
-Tue May  6 15:08:35 2025 - Pipe created. Waiting for connection...
-Tue May  6 15:15:03 2025 - Received stop request
-Tue May  6 15:15:03 2025 - Canceling pending pipe operations
-Tue May  6 15:15:03 2025 - Waiting for server thread to exit
-Tue May  6 15:31:21 2025 - Server thread started
-Tue May  6 15:31:21 2025 - ObjectStore service started. Database initialized.
-Tue May  6 15:31:21 2025 - Pipe created. Waiting for connection...
-Tue May  6 15:31:43 2025 - Client connected
-Tue May  6 15:31:43 2025 - ReadFile error: 109
-Tue May  6 15:31:43 2025 - No data received
-Tue May  6 15:31:43 2025 - Pipe created. Waiting for connection...
-Tue May  6 15:35:10 2025 - Client connected
-Tue May  6 15:35:10 2025 - ReadFile error: 109
-Tue May  6 15:35:10 2025 - No data received
-Tue May  6 15:35:10 2025 - Pipe created. Waiting for connection...
-Tue May  6 15:40:09 2025 - Received stop request
-Tue May  6 15:40:09 2025 - Canceling pending pipe operations
-Tue May  6 15:40:10 2025 - Waiting for server thread to exit
-Tue May  6 16:11:21 2025 - Server thread started
-Tue May  6 16:11:21 2025 - ObjectStore service started. Database initialized.
-Tue May  6 16:11:21 2025 - Pipe created. Waiting for connection...
-Tue May  6 16:11:45 2025 - Client connected
-Tue May  6 16:11:45 2025 - Client connected to pipe
-Tue May  6 16:11:45 2025 - PeekNamedPipe failed with error: 109
-Tue May  6 16:11:45 2025 - Pipe created. Waiting for connection...
-Tue May  6 16:21:04 2025 - Received stop request
-Tue May  6 16:21:04 2025 - Canceling pending pipe operations
-Tue May  6 16:21:05 2025 - Waiting for server thread to exit
-Tue May  6 16:28:06 2025 - Server thread started
-Tue May  6 16:28:06 2025 - ObjectStore service started. Database initialized.
-Tue May  6 16:28:06 2025 - HTTP server started on port 8081
-Tue May  6 16:28:52 2025 - Received HTTP request to store chunks
-Tue May  6 16:28:52 2025 - Received JSON data of size: 2796459
-Tue May  6 16:28:52 2025 - Processing CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_054515c9690d9697 with 2 chunks
-Tue May  6 16:28:52 2025 - Successfully inserted metadata for chunk: 4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56
-Tue May  6 16:28:52 2025 - Successfully inserted metadata for chunk: 4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56
-Tue May  6 16:28:52 2025 - Successfully handled CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_054515c9690d9697
-Tue May  6 16:35:02 2025 - Received HTTP request to store chunks
-Tue May  6 16:35:02 2025 - Received JSON data of size: 4194633
-Tue May  6 16:35:02 2025 - Processing CID: d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_961ad2966928deb1 with 3 chunks
-Tue May  6 16:35:02 2025 - Successfully inserted metadata for chunk: 5ae9782017a68037004b2bf806c77d324db4d915ed3725d84eb3121b2ad16061
-Tue May  6 16:35:02 2025 - Successfully inserted metadata for chunk: 4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56
-Tue May  6 16:35:02 2025 - Successfully inserted metadata for chunk: 4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56
-Tue May  6 16:35:02 2025 - Successfully handled CID: d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_961ad2966928deb1
-Tue May  6 16:55:12 2025 - Received stop request
-Tue May  6 16:55:12 2025 - HTTP server stopped
-Tue May  6 16:55:12 2025 - Waiting for server thread to exit
-Tue May  6 16:55:12 2025 - Server thread exited
-Tue May  6 16:55:12 2025 - Service stopped
-Tue May  6 16:58:18 2025 - Database initialized (chunks_data).
-Tue May  6 16:58:18 2025 - StorageService starting HTTP on port 8081
-Tue May  6 16:58:45 2025 - POST /store received, Content-Length=2796459
-Tue May  6 16:58:45 2025 - Storing CID=9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_21ef2359ce224010 with 2 chunks
-Tue May  6 16:58:45 2025 - Inserted chunk_index=1 for CID=9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_21ef2359ce224010
-Tue May  6 16:58:45 2025 - Inserted chunk_index=2 for CID=9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_21ef2359ce224010
-Tue May  6 16:58:51 2025 - POST /store received, Content-Length=4194633
-Tue May  6 16:58:51 2025 - Storing CID=d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_33987f6f33000a0f with 3 chunks
-Tue May  6 16:58:51 2025 - Inserted chunk_index=1 for CID=d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_33987f6f33000a0f
-Tue May  6 16:58:51 2025 - Inserted chunk_index=2 for CID=d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_33987f6f33000a0f
-Tue May  6 16:58:51 2025 - Inserted chunk_index=3 for CID=d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_33987f6f33000a0f
-Tue May  6 17:25:30 2025 - Service stopping...
-Tue May  6 17:25:30 2025 - HTTP server stopped
-Tue May  6 17:33:22 2025 - Database initialized (chunks_data).
-Tue May  6 17:33:22 2025 - StorageService starting HTTP on port 8081
-Tue May  6 17:34:21 2025 - GET /file/d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_33987f6f33000a0f received
-Tue May  6 17:34:21 2025 - Found 3 chunks for CID: d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_33987f6f33000a0f
-Tue May  6 17:34:21 2025 - Successfully sent file data for CID: d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_33987f6f33000a0f
-Tue May  6 17:34:28 2025 - GET /file/d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_33987f6f33000a0f received
-Tue May  6 17:34:28 2025 - Found 3 chunks for CID: d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_33987f6f33000a0f
-Tue May  6 17:34:29 2025 - Successfully sent file data for CID: d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_33987f6f33000a0f
-Tue May  6 17:35:21 2025 - GET /file/9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_21ef2359ce224010 received
-Tue May  6 17:35:21 2025 - Found 2 chunks for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_21ef2359ce224010
-Tue May  6 17:35:21 2025 - Successfully sent file data for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_21ef2359ce224010
-Tue May  6 18:04:11 2025 - Service stopping...
-Tue May  6 18:04:11 2025 - HTTP server stopped
-Tue May  6 18:05:57 2025 - Database initialized (chunks_data, file_metadata, content_references).
-Tue May  6 18:05:57 2025 - StorageService starting HTTP on port 8081
-Tue May  6 18:07:25 2025 - POST /store received, Content-Length=4194668
-Tue May  6 18:07:25 2025 - Storing CID=d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_c0fd44f501fe55b6 with 3 chunks
-Tue May  6 18:07:25 2025 - Inserted new content hash=631c31c92068443823f730490f06561f3face145a088413efff0061f0a46a32a with ref_count=1
-Tue May  6 18:07:25 2025 - Inserted chunk_index=1 for CID=d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_c0fd44f501fe55b6
-Tue May  6 18:07:25 2025 - Inserted chunk_index=2 for CID=d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_c0fd44f501fe55b6
-Tue May  6 18:07:25 2025 - Inserted chunk_index=3 for CID=d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_c0fd44f501fe55b6
-Tue May  6 18:07:25 2025 - Inserted metadata for CID=d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_c0fd44f501fe55b6
-Tue May  6 18:08:42 2025 - POST /store received, Content-Length=2796494
-Tue May  6 18:08:42 2025 - Storing CID=9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_e958c476babeb043 with 2 chunks
-Tue May  6 18:08:42 2025 - Inserted new content hash=5b766f6d76a999636fd93b4e039d5a32187f84a19c0950449f0c721da0223914 with ref_count=1
-Tue May  6 18:08:42 2025 - Inserted chunk_index=1 for CID=9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_e958c476babeb043
-Tue May  6 18:08:42 2025 - Inserted chunk_index=2 for CID=9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_e958c476babeb043
-Tue May  6 18:08:42 2025 - Inserted metadata for CID=9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_e958c476babeb043
-Tue May  6 18:09:52 2025 - GET /file/9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_e958c476babeb043 received
-Tue May  6 18:09:52 2025 - Found 2 chunks for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_e958c476babeb043
-Tue May  6 18:09:52 2025 - Successfully sent file data for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_e958c476babeb043
-Tue May  6 18:09:55 2025 - GET /file/9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_e958c476babeb043 received
-Tue May  6 18:09:55 2025 - Found 2 chunks for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_e958c476babeb043
-Tue May  6 18:09:55 2025 - Successfully sent file data for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_e958c476babeb043
-Tue May  6 18:25:31 2025 - Service stopping...
-Tue May  6 18:25:31 2025 - HTTP server stopped
-Tue May  6 18:26:55 2025 - Database initialized (file_chunks, chunk_references, file_metadata).
-Tue May  6 18:26:55 2025 - StorageService starting HTTP on port 8081
-Tue May  6 18:27:51 2025 - POST /store received, Content-Length=3496301
-Tue May  6 18:27:51 2025 - Storing CID=93abb34e0efa37b8f502b8686aa8fbc7771d99edadd957341c87b155977d54d6_30c00d1f126e0ce8 with 3 chunks
-Tue May  6 18:27:51 2025 - Updated reference counts for 3 chunks for CID: 93abb34e0efa37b8f502b8686aa8fbc7771d99edadd957341c87b155977d54d6_30c00d1f126e0ce8
-Tue May  6 18:33:41 2025 - POST /store received, Content-Length=4194668
-Tue May  6 18:33:41 2025 - Storing CID=d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_6f679ed196c7a195 with 3 chunks
-Tue May  6 18:33:41 2025 - Failed to prepare SELECT for hash: 5ae9782017a68037004b2bf806c77d324db4d915ed3725d84eb3121b2ad16061
-Tue May  6 18:33:41 2025 - Failed to prepare INSERT for hash: 5ae9782017a68037004b2bf806c77d324db4d915ed3725d84eb3121b2ad16061
-Tue May  6 18:33:41 2025 - Failed to prepare file_chunks INSERT for CID: d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_6f679ed196c7a195
-Tue May  6 18:33:41 2025 - Failed to prepare SELECT for hash: 4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56
-Tue May  6 18:33:41 2025 - Failed to prepare INSERT for hash: 4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56
-Tue May  6 18:33:41 2025 - Failed to prepare file_chunks INSERT for CID: d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_6f679ed196c7a195
-Tue May  6 18:33:41 2025 - Failed to prepare SELECT for hash: 4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56
-Tue May  6 18:33:41 2025 - Failed to prepare INSERT for hash: 4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56
-Tue May  6 18:33:41 2025 - Failed to prepare file_chunks INSERT for CID: d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_6f679ed196c7a195
-Tue May  6 18:33:41 2025 - Failed to prepare file_metadata INSERT
-Tue May  6 18:33:41 2025 - Updated reference counts for 3 chunks for CID: d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_6f679ed196c7a195
-Tue May  6 18:34:52 2025 - POST /store received, Content-Length=3496301
-Tue May  6 18:34:52 2025 - Storing CID=93abb34e0efa37b8f502b8686aa8fbc7771d99edadd957341c87b155977d54d6_86527566012c8e88 with 3 chunks
-Tue May  6 18:34:52 2025 - Failed to prepare SELECT for hash: e258a491b361c73d4e8b71c8979ca7dddd9da1e32dc14b0ef40cc4ee25d36f6c
-Tue May  6 18:34:52 2025 - Failed to prepare INSERT for hash: e258a491b361c73d4e8b71c8979ca7dddd9da1e32dc14b0ef40cc4ee25d36f6c
-Tue May  6 18:34:52 2025 - Failed to prepare file_chunks INSERT for CID: 93abb34e0efa37b8f502b8686aa8fbc7771d99edadd957341c87b155977d54d6_86527566012c8e88
-Tue May  6 18:34:52 2025 - Failed to prepare SELECT for hash: 581c37049b23e2efdf56edc980105e7f7af8305dce8a1238c0934f85e5e962f3
-Tue May  6 18:34:52 2025 - Failed to prepare INSERT for hash: 581c37049b23e2efdf56edc980105e7f7af8305dce8a1238c0934f85e5e962f3
-Tue May  6 18:34:52 2025 - Failed to prepare file_chunks INSERT for CID: 93abb34e0efa37b8f502b8686aa8fbc7771d99edadd957341c87b155977d54d6_86527566012c8e88
-Tue May  6 18:34:52 2025 - Failed to prepare SELECT for hash: 99e4ce59c324f3e8bb3d8d83014fc54f4e7ec874ae1f37ceb1c7df1cfa09f780
-Tue May  6 18:34:52 2025 - Failed to prepare INSERT for hash: 99e4ce59c324f3e8bb3d8d83014fc54f4e7ec874ae1f37ceb1c7df1cfa09f780
-Tue May  6 18:34:52 2025 - Failed to prepare file_chunks INSERT for CID: 93abb34e0efa37b8f502b8686aa8fbc7771d99edadd957341c87b155977d54d6_86527566012c8e88
-Tue May  6 18:34:52 2025 - Failed to prepare file_metadata INSERT
-Tue May  6 18:34:52 2025 - Updated reference counts for 3 chunks for CID: 93abb34e0efa37b8f502b8686aa8fbc7771d99edadd957341c87b155977d54d6_86527566012c8e88
-Tue May  6 18:36:56 2025 - Database initialized (file_chunks, chunk_references, file_metadata).
-Tue May  6 18:36:56 2025 - StorageService starting HTTP on port 8081
-Tue May  6 18:37:44 2025 - POST /store received, Content-Length=3496301
-Tue May  6 18:37:44 2025 - Storing CID=93abb34e0efa37b8f502b8686aa8fbc7771d99edadd957341c87b155977d54d6_fb628d4cf6010b83 with 3 chunks
-Tue May  6 18:37:44 2025 - Updated reference counts for 3 chunks for CID: 93abb34e0efa37b8f502b8686aa8fbc7771d99edadd957341c87b155977d54d6_fb628d4cf6010b83
-Tue May  6 18:39:09 2025 - POST /store received, Content-Length=4194668
-Tue May  6 18:39:09 2025 - Storing CID=d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_a389fa5a2f979f76 with 3 chunks
-Tue May  6 18:39:09 2025 - Updated reference counts for 3 chunks for CID: d5fa106cbb953d0fd77b1d586835dbdc1d2279b29b13a38bce8b91683188c31c_a389fa5a2f979f76
-Tue May  6 18:39:13 2025 - POST /store received, Content-Length=2796494
-Tue May  6 18:39:13 2025 - Storing CID=9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_54cb56bdd5c6a5da with 2 chunks
-Tue May  6 18:39:13 2025 - Updated reference counts for 2 chunks for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_54cb56bdd5c6a5da
-Tue May  6 18:39:53 2025 - POST /store received, Content-Length=2796494
-Tue May  6 18:39:53 2025 - Storing CID=9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_c5a67589bcfb277b with 2 chunks
-Tue May  6 18:39:53 2025 - Updated reference counts for 2 chunks for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_c5a67589bcfb277b
-Wed May  7 10:09:15 2025 - Database initialized (file_chunks, chunk_references, file_metadata).
-Wed May  7 10:09:15 2025 - StorageService starting HTTP on port 8081
-Wed May  7 10:09:59 2025 - GET /file/9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_54cb56bdd5c6a5da received
-Wed May  7 10:09:59 2025 - Found original filename: file_2mb.txt for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_54cb56bdd5c6a5da
-Wed May  7 10:09:59 2025 - Found 2 chunks for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_54cb56bdd5c6a5da
-Wed May  7 10:09:59 2025 - Successfully read 1048576 bytes from C:\Users\Training\Desktop\ProjectRoot\BackendService\Chunks\4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56.bin
-Wed May  7 10:09:59 2025 - Successfully read 1048576 bytes from C:\Users\Training\Desktop\ProjectRoot\BackendService\Chunks\4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56.bin
-Wed May  7 10:09:59 2025 - Sending response with 2 chunks
-Wed May  7 10:10:03 2025 - GET /file/9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_54cb56bdd5c6a5da received
-Wed May  7 10:10:03 2025 - Found original filename: file_2mb.txt for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_54cb56bdd5c6a5da
-Wed May  7 10:10:03 2025 - Found 2 chunks for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_54cb56bdd5c6a5da
-Wed May  7 10:10:03 2025 - Successfully read 1048576 bytes from C:\Users\Training\Desktop\ProjectRoot\BackendService\Chunks\4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56.bin
-Wed May  7 10:10:03 2025 - Successfully read 1048576 bytes from C:\Users\Training\Desktop\ProjectRoot\BackendService\Chunks\4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56.bin
-Wed May  7 10:10:03 2025 - Sending response with 2 chunks
-Wed May  7 10:10:15 2025 - POST /store received, Content-Length=2796494
-Wed May  7 10:10:15 2025 - Storing CID=9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_770ce31a0ad26c83 with 2 chunks
-Wed May  7 10:10:15 2025 - Updated reference counts for 2 chunks for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_770ce31a0ad26c83
-Wed May  7 10:10:29 2025 - GET /file/9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_770ce31a0ad26c83 received
-Wed May  7 10:10:29 2025 - Found original filename: file_2mb.txt for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_770ce31a0ad26c83
-Wed May  7 10:10:29 2025 - Found 2 chunks for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_770ce31a0ad26c83
-Wed May  7 10:10:29 2025 - Successfully read 1048576 bytes from C:\Users\Training\Desktop\ProjectRoot\BackendService\Chunks\4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56.bin
-Wed May  7 10:10:29 2025 - Successfully read 1048576 bytes from C:\Users\Training\Desktop\ProjectRoot\BackendService\Chunks\4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56.bin
-Wed May  7 10:10:29 2025 - Sending response with 2 chunks
-Wed May  7 10:10:52 2025 - GET /file/9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_770ce31a0ad26c83 received
-Wed May  7 10:10:52 2025 - Found original filename: file_2mb.txt for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_770ce31a0ad26c83
-Wed May  7 10:10:52 2025 - Found 2 chunks for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_770ce31a0ad26c83
-Wed May  7 10:10:52 2025 - Successfully read 1048576 bytes from C:\Users\Training\Desktop\ProjectRoot\BackendService\Chunks\4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56.bin
-Wed May  7 10:10:52 2025 - Successfully read 1048576 bytes from C:\Users\Training\Desktop\ProjectRoot\BackendService\Chunks\4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56.bin
-Wed May  7 10:10:53 2025 - Sending response with 2 chunks
-Wed May  7 10:17:12 2025 - Database initialized (file_chunks, chunk_references, file_metadata).
-Wed May  7 10:17:12 2025 - StorageService starting HTTP on port 8081
-Wed May  7 10:23:14 2025 - Database initialized (file_chunks, chunk_references, file_metadata).
-Wed May  7 10:23:14 2025 - StorageService starting HTTP on port 8081
-Wed May  7 10:50:50 2025 - Database initialized (file_chunks, chunk_references, file_metadata).
-Wed May  7 10:50:50 2025 - StorageService starting HTTP on port 8081
-Wed May  7 10:54:00 2025 - POST /store received, Content-Length=2796494
-Wed May  7 10:54:00 2025 - Storing CID=9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_f5c3200d6076e241 with 2 chunks
-Wed May  7 10:54:00 2025 - Updated reference counts for 2 chunks for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_f5c3200d6076e241
-Wed May  7 11:08:34 2025 - POST /store received, Content-Length=2796494
-Wed May  7 11:08:34 2025 - Storing CID=9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_1af44c98716a5241 with 2 chunks
-Wed May  7 11:08:34 2025 - Updated reference counts for 2 chunks for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_1af44c98716a5241
-Wed May  7 11:23:04 2025 - POST /store received, Content-Length=2796494
-Wed May  7 11:23:04 2025 - Storing CID=9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_f376bb2b92e8ae71 with 2 chunks
-Wed May  7 11:23:04 2025 - Updated reference counts for 2 chunks for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_f376bb2b92e8ae71
-Wed May  7 11:27:46 2025 - Database initialized (file_chunks, chunk_references, file_metadata).
-Wed May  7 11:27:46 2025 - StorageService starting HTTP on port 8081
-Wed May  7 11:35:09 2025 - POST /store received, Content-Length=68918138
-Wed May  7 11:35:09 2025 - Storing CID=d9890958fee79a61c58ec629ec93f437bda0b4dfee773f422f001c7099d9ea99_f2fc9d37afac893d with 50 chunks
-Wed May  7 11:35:11 2025 - Updated reference counts for 50 chunks for CID: d9890958fee79a61c58ec629ec93f437bda0b4dfee773f422f001c7099d9ea99_f2fc9d37afac893d
-Wed May  7 16:31:02 2025 - Database initialized (file_chunks, chunk_references, file_metadata).
-Wed May  7 16:31:02 2025 - StorageService starting HTTP on port 8081
-Wed May  7 16:31:12 2025 - POST /store received, Content-Length=68918138
-Wed May  7 16:31:13 2025 - Storing CID=d9890958fee79a61c58ec629ec93f437bda0b4dfee773f422f001c7099d9ea99_19ab924bfde81804 with 50 chunks
-Wed May  7 16:31:14 2025 - Updated reference counts for 50 chunks for CID: d9890958fee79a61c58ec629ec93f437bda0b4dfee773f422f001c7099d9ea99_19ab924bfde81804
+2025-05-07 17:47:33.872 - Database initialized (file_chunks, chunk_references, file_metadata).
+2025-05-07 17:47:33.874 - StorageService starting HTTP on port 8081
+2025-05-07 17:47:44.114 - POST /store received from service 1, Content-Length=68918138
+2025-05-07 17:47:45.256 - Storing CID=d9890958fee79a61c58ec629ec93f437bda0b4dfee773f422f001c7099d9ea99_05b4df19b6dc40d3 with 50 chunks
+2025-05-07 17:47:45.289 - Updating ref count 
+2025-05-07 17:47:45.303 - Saving in file_chunks table
+2025-05-07 17:47:45.340 - Updating ref count 
+2025-05-07 17:47:45.341 - Saving in file_chunks table
+2025-05-07 17:47:45.371 - Updating ref count 
+2025-05-07 17:47:45.373 - Saving in file_chunks table
+2025-05-07 17:47:45.405 - Updating ref count 
+2025-05-07 17:47:45.416 - Saving in file_chunks table
+2025-05-07 17:47:45.444 - Updating ref count 
+2025-05-07 17:47:45.445 - Saving in file_chunks table
+2025-05-07 17:47:45.478 - Updating ref count 
+2025-05-07 17:47:45.478 - Saving in file_chunks table
+2025-05-07 17:47:45.508 - Updating ref count 
+2025-05-07 17:47:45.509 - Saving in file_chunks table
+2025-05-07 17:47:45.542 - Updating ref count 
+2025-05-07 17:47:45.542 - Saving in file_chunks table
+2025-05-07 17:47:45.574 - Updating ref count 
+2025-05-07 17:47:45.575 - Saving in file_chunks table
+2025-05-07 17:47:45.607 - Updating ref count 
+2025-05-07 17:47:45.608 - Saving in file_chunks table
+2025-05-07 17:47:45.641 - Updating ref count 
+2025-05-07 17:47:45.642 - Saving in file_chunks table
+2025-05-07 17:47:45.678 - Updating ref count 
+2025-05-07 17:47:45.678 - Saving in file_chunks table
+2025-05-07 17:47:45.713 - Updating ref count 
+2025-05-07 17:47:45.713 - Saving in file_chunks table
+2025-05-07 17:47:45.747 - Updating ref count 
+2025-05-07 17:47:45.747 - Saving in file_chunks table
+2025-05-07 17:47:45.779 - Updating ref count 
+2025-05-07 17:47:45.779 - Saving in file_chunks table
+2025-05-07 17:47:45.806 - Updating ref count 
+2025-05-07 17:47:45.807 - Saving in file_chunks table
+2025-05-07 17:47:45.838 - Updating ref count 
+2025-05-07 17:47:45.839 - Saving in file_chunks table
+2025-05-07 17:47:45.873 - Updating ref count 
+2025-05-07 17:47:45.874 - Saving in file_chunks table
+2025-05-07 17:47:45.904 - Updating ref count 
+2025-05-07 17:47:45.905 - Saving in file_chunks table
+2025-05-07 17:47:45.934 - Updating ref count 
+2025-05-07 17:47:45.935 - Saving in file_chunks table
+2025-05-07 17:47:45.959 - Updating ref count 
+2025-05-07 17:47:45.960 - Saving in file_chunks table
+2025-05-07 17:47:45.992 - Updating ref count 
+2025-05-07 17:47:45.993 - Saving in file_chunks table
+2025-05-07 17:47:46.023 - Updating ref count 
+2025-05-07 17:47:46.024 - Saving in file_chunks table
+2025-05-07 17:47:46.052 - Updating ref count 
+2025-05-07 17:47:46.052 - Saving in file_chunks table
+2025-05-07 17:47:46.077 - Updating ref count 
+2025-05-07 17:47:46.078 - Saving in file_chunks table
+2025-05-07 17:47:46.101 - Updating ref count 
+2025-05-07 17:47:46.102 - Saving in file_chunks table
+2025-05-07 17:47:46.133 - Updating ref count 
+2025-05-07 17:47:46.134 - Saving in file_chunks table
+2025-05-07 17:47:46.167 - Updating ref count 
+2025-05-07 17:47:46.168 - Saving in file_chunks table
+2025-05-07 17:47:46.201 - Updating ref count 
+2025-05-07 17:47:46.202 - Saving in file_chunks table
+2025-05-07 17:47:46.235 - Updating ref count 
+2025-05-07 17:47:46.236 - Saving in file_chunks table
+2025-05-07 17:47:46.264 - Updating ref count 
+2025-05-07 17:47:46.265 - Saving in file_chunks table
+2025-05-07 17:47:46.293 - Updating ref count 
+2025-05-07 17:47:46.294 - Saving in file_chunks table
+2025-05-07 17:47:46.324 - Updating ref count 
+2025-05-07 17:47:46.325 - Saving in file_chunks table
+2025-05-07 17:47:46.352 - Updating ref count 
+2025-05-07 17:47:46.353 - Saving in file_chunks table
+2025-05-07 17:47:46.384 - Updating ref count 
+2025-05-07 17:47:46.385 - Saving in file_chunks table
+2025-05-07 17:47:46.410 - Updating ref count 
+2025-05-07 17:47:46.411 - Saving in file_chunks table
+2025-05-07 17:47:46.443 - Updating ref count 
+2025-05-07 17:47:46.443 - Saving in file_chunks table
+2025-05-07 17:47:46.467 - Updating ref count 
+2025-05-07 17:47:46.468 - Saving in file_chunks table
+2025-05-07 17:47:46.491 - Updating ref count 
+2025-05-07 17:47:46.492 - Saving in file_chunks table
+2025-05-07 17:47:46.523 - Updating ref count 
+2025-05-07 17:47:46.524 - Saving in file_chunks table
+2025-05-07 17:47:46.550 - Updating ref count 
+2025-05-07 17:47:46.551 - Saving in file_chunks table
+2025-05-07 17:47:46.581 - Updating ref count 
+2025-05-07 17:47:46.582 - Saving in file_chunks table
+2025-05-07 17:47:46.613 - Updating ref count 
+2025-05-07 17:47:46.614 - Saving in file_chunks table
+2025-05-07 17:47:46.646 - Updating ref count 
+2025-05-07 17:47:46.646 - Saving in file_chunks table
+2025-05-07 17:47:46.682 - Updating ref count 
+2025-05-07 17:47:46.683 - Saving in file_chunks table
+2025-05-07 17:47:46.718 - Updating ref count 
+2025-05-07 17:47:46.719 - Saving in file_chunks table
+2025-05-07 17:47:46.749 - Updating ref count 
+2025-05-07 17:47:46.750 - Saving in file_chunks table
+2025-05-07 17:47:46.790 - Updating ref count 
+2025-05-07 17:47:46.790 - Saving in file_chunks table
+2025-05-07 17:47:46.817 - Updating ref count 
+2025-05-07 17:47:46.818 - Saving in file_chunks table
+2025-05-07 17:47:46.828 - Updating ref count 
+2025-05-07 17:47:46.829 - Saving in file_chunks table
+2025-05-07 17:47:46.830 - Inserting into file_metadata table
+2025-05-07 17:47:46.845 - Updated ALl tables for  50 chunks for CID: d9890958fee79a61c58ec629ec93f437bda0b4dfee773f422f001c7099d9ea99_05b4df19b6dc40d3
+2025-05-07 17:52:08.277 - Database initialized (file_chunks, chunk_references, file_metadata).
+2025-05-07 17:52:08.278 - StorageService starting HTTP on port 8081
+2025-05-07 17:52:17.021 - POST /store received, Content-Length=68918138
+2025-05-07 17:52:17.974 - Storing CID=d9890958fee79a61c58ec629ec93f437bda0b4dfee773f422f001c7099d9ea99_5d5469bbab50af19 with 50 chunks
+2025-05-07 17:52:19.179 - Updated reference counts for 50 chunks for CID: d9890958fee79a61c58ec629ec93f437bda0b4dfee773f422f001c7099d9ea99_5d5469bbab50af19
+2025-05-07 18:01:52.694 - Database initialized (file_chunks, chunk_references, file_metadata).
+2025-05-07 18:01:52.697 - StorageService starting HTTP on port 8081
+2025-05-07 18:02:48.946 - POST /store received, Content-Length=68918138
+2025-05-07 18:02:50.077 - Storing CID=d9890958fee79a61c58ec629ec93f437bda0b4dfee773f422f001c7099d9ea99_b44bdab404e9ad3a with 50 chunks
+2025-05-07 18:02:51.399 - Updated reference counts for 50 chunks for CID: d9890958fee79a61c58ec629ec93f437bda0b4dfee773f422f001c7099d9ea99_b44bdab404e9ad3a

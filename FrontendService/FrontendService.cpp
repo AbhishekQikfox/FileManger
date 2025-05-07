@@ -38,10 +38,19 @@ std::string LOG_FILE_PATH;
 void WriteLog(const std::string& message) {
     std::lock_guard<std::mutex> lock(logMutex);
     if (logFile.is_open()) {
-        time_t now = time(0);
-        char* dt = ctime(&now);
-        dt[strlen(dt) - 1] = 0;
-        logFile << dt << " - " << message << std::endl;
+        // Get current time with high resolution
+        auto now = std::chrono::system_clock::now();
+        auto now_time_t = std::chrono::system_clock::to_time_t(now);
+        auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                          now.time_since_epoch()) % 1000;
+
+        // Format the time string with milliseconds
+        std::ostringstream oss;
+        oss << std::put_time(std::localtime(&now_time_t), "%Y-%m-%d %H:%M:%S")
+            << '.' << std::setfill('0') << std::setw(3) << now_ms.count();
+
+        // Write to log
+        logFile << oss.str() << " - " << message << std::endl;
         logFile.flush();
     }
 }
@@ -341,7 +350,7 @@ void RunServer() {
         payload["original_filename"] = file.filename;
         std::string jsonStr = payload.dump();
         WriteLog("JSON payload size: " + std::to_string(jsonStr.size()) + " bytes");
-        
+        WriteLog("Sending to backend.");
         // Send to backend
         if (!SendToBackendHTTP(jsonStr)) {
             WriteLog("Failed to send to backend");

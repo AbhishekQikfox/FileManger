@@ -1,37 +1,22 @@
-Wed May  7 11:07:54 2025 - Frontend service starting with config: {"backend_host":"127.0.0.1","backend_port":8081,"chunk_size":1048576,"log_file":"C:\\Users\\Training\\Desktop\\ProjectRoot\\FrontendService\\frontend.log","server_port":8080}
-Wed May  7 11:07:54 2025 - Server started on port 8080
-Wed May  7 11:08:34 2025 - Received upload: file_2mb.txt (2097152 bytes)
-Wed May  7 11:08:34 2025 - File divided into 2 chunks
-Wed May  7 11:08:34 2025 - Generated CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_1af44c98716a5241
-Wed May  7 11:08:34 2025 - JSON payload size: 2796494 bytes
-Wed May  7 11:08:34 2025 - Connecting to backend service at 127.0.0.1:8081
-Wed May  7 11:08:34 2025 - Successfully sent metadata to backend. Response: Success
-Wed May  7 11:08:34 2025 - Successfully sent to backend. Returning CID to client.
-Wed May  7 11:23:04 2025 - Received upload: file_2mb.txt (2097152 bytes)
-Wed May  7 11:23:04 2025 - File divided into 2 chunks
-Wed May  7 11:23:04 2025 - Generated CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_f376bb2b92e8ae71
-Wed May  7 11:23:04 2025 - JSON payload size: 2796494 bytes
-Wed May  7 11:23:04 2025 - Connecting to backend service at 127.0.0.1:8081
-Wed May  7 11:23:04 2025 - Successfully sent metadata to backend. Response: Success
-Wed May  7 11:23:04 2025 - Successfully sent to backend. Returning CID to client.
-Wed May  7 11:27:36 2025 - Server stopped
-Wed May  7 11:27:38 2025 - Frontend service starting with config: {"backend_host":"127.0.0.1","backend_port":8081,"chunk_size":1048576,"log_file":"C:\\Users\\Training\\Desktop\\ProjectRoot\\FrontendService\\frontend.log","server_port":8080}
-Wed May  7 11:27:38 2025 - Server started on port 8080
-Wed May  7 11:35:06 2025 - Received upload: 50mb.txt (51685773 bytes)
-Wed May  7 11:35:07 2025 - File divided into 50 chunks
-Wed May  7 11:35:07 2025 - Generated CID: d9890958fee79a61c58ec629ec93f437bda0b4dfee773f422f001c7099d9ea99_f2fc9d37afac893d
-Wed May  7 11:35:08 2025 - JSON payload size: 68918138 bytes
-Wed May  7 11:35:08 2025 - Connecting to backend service at 127.0.0.1:8081
-Wed May  7 11:35:11 2025 - Successfully sent metadata to backend. Response: Success
-Wed May  7 11:35:11 2025 - Successfully sent to backend. Returning CID to client.
-Wed May  7 16:30:54 2025 - Frontend service starting with config: {"backend_host":"127.0.0.1","backend_port":8081,"chunk_size":1048576,"log_file":"C:\\Users\\Training\\Desktop\\ProjectRoot\\FrontendService\\frontend.log","server_port":8080}
-Wed May  7 16:30:54 2025 - Server started on port 8080
-Wed May  7 16:31:10 2025 - Received upload: 50mb.txt (51685773 bytes)
-Wed May  7 16:31:10 2025 - Created thread pool with 8 threads
-Wed May  7 16:31:10 2025 - Processing file in 50 chunks
-Wed May  7 16:31:10 2025 - All chunks processed in parallel
-Wed May  7 16:31:10 2025 - Generated CID: d9890958fee79a61c58ec629ec93f437bda0b4dfee773f422f001c7099d9ea99_19ab924bfde81804
-Wed May  7 16:31:11 2025 - JSON payload size: 68918138 bytes
-Wed May  7 16:31:11 2025 - Connecting to backend service at 127.0.0.1:8081
-Wed May  7 16:31:14 2025 - Successfully sent metadata to backend. Response: Success
-Wed May  7 16:31:14 2025 - Successfully sent to backend. Returning CID to client.
+2025-05-07 17:47:30.229 - Frontend service starting with config: {"backend_host":"127.0.0.1","backend_port":8081,"chunk_size":1048576,"log_file":"C:\\Users\\Training\\Desktop\\ProjectRoot\\FrontendService\\frontend.log","server_port":8080}
+2025-05-07 17:47:30.232 - Server started on port 8080
+2025-05-07 17:47:42.235 - Received upload: 50mb.txt (51685773 bytes)
+2025-05-07 17:47:42.236 - Created thread pool with 8 threads
+2025-05-07 17:47:42.252 - Processing file in 50 chunks
+2025-05-07 17:47:42.498 - All chunks processed in parallel
+2025-05-07 17:47:42.500 - Generated CID: d9890958fee79a61c58ec629ec93f437bda0b4dfee773f422f001c7099d9ea99_05b4df19b6dc40d3
+2025-05-07 17:47:43.733 - JSON payload size: 68918138 bytes
+2025-05-07 17:47:43.743 - Sending to backend.
+2025-05-07 17:47:43.743 - Connecting to backend service at 127.0.0.1:8081
+2025-05-07 17:47:46.880 - Successfully sent metadata to backend. Response: Success
+2025-05-07 17:47:46.880 - Successfully sent to backend. Returning CID to client.
+2025-05-07 17:52:15.080 - Received upload: 50mb.txt (51685773 bytes)
+2025-05-07 17:52:15.080 - Created thread pool with 8 threads
+2025-05-07 17:52:15.100 - Processing file in 50 chunks
+2025-05-07 17:52:15.371 - All chunks processed in parallel
+2025-05-07 17:52:15.371 - Generated CID: d9890958fee79a61c58ec629ec93f437bda0b4dfee773f422f001c7099d9ea99_5d5469bbab50af19
+2025-05-07 17:52:16.646 - JSON payload size: 68918138 bytes
+2025-05-07 17:52:16.646 - Sending to backend.
+2025-05-07 17:52:16.646 - Connecting to backend service at 127.0.0.1:8081
+2025-05-07 17:52:19.222 - Successfully sent metadata to backend. Response: Success
+2025-05-07 17:52:19.222 - Successfully sent to backend. Returning CID to client.

@@ -37,13 +37,23 @@ std::mutex                serverMutex;
 std::condition_variable   serverCV;
 httplib::Server*          serverPtr = nullptr;
 
+
+
 void WriteLog(const std::string& msg) {
     std::ofstream log(DB_DIR + "\\backend.log", std::ios::app);
     if (log.is_open()) {
-        time_t now = time(0);
-        char* dt = ctime(&now);
-        dt[strlen(dt)-1] = 0;
-        log << dt << " - " << msg << std::endl;
+        // Get current time with millisecond precision
+        auto now = std::chrono::system_clock::now();
+        auto now_time_t = std::chrono::system_clock::to_time_t(now);
+        auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                          now.time_since_epoch()) % 1000;
+
+        // Format time string
+        std::ostringstream oss;
+        oss << std::put_time(std::localtime(&now_time_t), "%Y-%m-%d %H:%M:%S")
+            << '.' << std::setfill('0') << std::setw(3) << now_ms.count();
+
+        log << oss.str() << " - " << msg << std::endl;
     }
 }
 
@@ -212,171 +222,170 @@ void RunHTTPServer() {
 
     httplib::Server server;
 
-    // Modified POST /store handler to remove the redundant SHA-256 hash computation
-server.Post("/store", [](const httplib::Request& req, httplib::Response& res) {
-    WriteLog("POST /store received, Content-Length=" + std::to_string(req.body.size()));
-    if (req.get_header_value("Content-Type") != "application/json") {
-        res.status = 400;
-        res.set_content("Expected application/json", "text/plain");
-        return;
-    }
-
-    try {
-        json payload   = json::parse(req.body);
-        std::string cid= payload.at("cid").get<std::string>();
-        auto hashes    = payload.at("chunks").get<std::vector<std::string>>();
-        auto chunksB64 = payload.at("data").get<std::vector<std::string>>();
-        std::string original_filename = payload.at("original_filename").get<std::string>();
-
-        if (hashes.size() != chunksB64.size()) {
+    server.Post("/store", [](const httplib::Request& req, httplib::Response& res) {
+        WriteLog("POST /store received, Content-Length=" + std::to_string(req.body.size()));
+        if (req.get_header_value("Content-Type") != "application/json") {
             res.status = 400;
-            res.set_content("chunks/data size mismatch", "text/plain");
+            res.set_content("Expected application/json", "text/plain");
             return;
         }
-
-        WriteLog("Storing CID=" + cid + " with " + std::to_string(hashes.size()) + " chunks");
-
-        sqlite3* db = nullptr;
-        if (sqlite3_open(DB_PATH.c_str(), &db) != SQLITE_OK) {
-            res.status = 500;
-            res.set_content("Database error", "text/plain");
-            return;
-        }
-
-        // Begin transaction for the entire upload
-        if (sqlite3_exec(db, "BEGIN;", nullptr, nullptr, nullptr) != SQLITE_OK) {
-            WriteLog("Failed to begin transaction");
-            sqlite3_close(db);
-            res.status = 500;
-            res.set_content("Transaction error", "text/plain");
-            return;
-        }
-
-        for (size_t i = 0; i < hashes.size(); ++i) {
-            std::string hash = hashes[i];
-            std::string encoded_data = chunksB64[i];
-            auto raw_data = base64_decode(encoded_data);
-            
-            if (raw_data.empty()) {
-                WriteLog("Decode failed for chunk " + std::to_string(i));
-                sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
-                sqlite3_close(db);
+    
+        try {
+            json payload   = json::parse(req.body);
+            std::string cid= payload.at("cid").get<std::string>();
+            auto hashes    = payload.at("chunks").get<std::vector<std::string>>();
+            auto chunksB64 = payload.at("data").get<std::vector<std::string>>();
+            std::string original_filename = payload.at("original_filename").get<std::string>();
+    
+            if (hashes.size() != chunksB64.size()) {
                 res.status = 400;
-                res.set_content("Invalid chunk data", "text/plain");
+                res.set_content("chunks/data size mismatch", "text/plain");
                 return;
             }
-            
-            // Removed SHA-256 hash computation and validation
-            // Trust the hash provided by the frontend
-
-            // Update reference count similar to batchUpdateRefCounts
-            const char* sql_select = "SELECT ref_count FROM chunk_references WHERE hash = ?;";
-            sqlite3_stmt* stmt_select;
-            int ref_count = 0;
-            bool hash_exists = false;
-
-            if (sqlite3_prepare_v2(db, sql_select, -1, &stmt_select, nullptr) == SQLITE_OK) {
-                sqlite3_bind_text(stmt_select, 1, hash.c_str(), -1, SQLITE_STATIC);
-                if (sqlite3_step(stmt_select) == SQLITE_ROW) {
-                    ref_count = sqlite3_column_int(stmt_select, 0);
-                    hash_exists = true;
-                }
-                sqlite3_finalize(stmt_select);
-            } else {
-                WriteLog("Failed to prepare SELECT for hash: " + hash);
+    
+            WriteLog("Storing CID=" + cid + " with " + std::to_string(hashes.size()) + " chunks");
+    
+            sqlite3* db = nullptr;
+            if (sqlite3_open(DB_PATH.c_str(), &db) != SQLITE_OK) {
+                res.status = 500;
+                res.set_content("Database error", "text/plain");
+                return;
             }
-
-            if (hash_exists) {
-                // Increment existing ref_count
-                const char* sql_update = "UPDATE chunk_references SET ref_count = ? WHERE hash = ?;";
-                sqlite3_stmt* stmt_update;
-                if (sqlite3_prepare_v2(db, sql_update, -1, &stmt_update, nullptr) == SQLITE_OK) {
-                    sqlite3_bind_int(stmt_update, 1, ref_count + 1);
-                    sqlite3_bind_text(stmt_update, 2, hash.c_str(), -1, SQLITE_STATIC);
-                    if (sqlite3_step(stmt_update) != SQLITE_DONE) {
-                        WriteLog("Failed to update ref_count for hash: " + hash);
-                    }
-                    sqlite3_finalize(stmt_update);
-                } else {
-                    WriteLog("Failed to prepare UPDATE for hash: " + hash);
+    
+            // Begin transaction for the entire upload
+            if (sqlite3_exec(db, "BEGIN;", nullptr, nullptr, nullptr) != SQLITE_OK) {
+                WriteLog("Failed to begin transaction");
+                sqlite3_close(db);
+                res.status = 500;
+                res.set_content("Transaction error", "text/plain");
+                return;
+            }
+    
+            for (size_t i = 0; i < hashes.size(); ++i) {
+                std::string hash = hashes[i];
+                std::string encoded_data = chunksB64[i];
+                auto raw_data = base64_decode(encoded_data);
+                
+                if (raw_data.empty()) {
+                    WriteLog("Decode failed for chunk " + std::to_string(i));
+                    sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
+                    sqlite3_close(db);
+                    res.status = 400;
+                    res.set_content("Invalid chunk data", "text/plain");
+                    return;
                 }
-            } else {
-                // Insert new hash with ref_count = 1 and save chunk data
-                const char* sql_insert = "INSERT INTO chunk_references (hash, ref_count) VALUES (?, 1);";
-                sqlite3_stmt* stmt_insert;
-                if (sqlite3_prepare_v2(db, sql_insert, -1, &stmt_insert, nullptr) == SQLITE_OK) {
-                    sqlite3_bind_text(stmt_insert, 1, hash.c_str(), -1, SQLITE_STATIC);
-                    if (sqlite3_step(stmt_insert) == SQLITE_DONE) {
-                        std::string path = CHUNK_DIR + "\\" + hash + ".bin";
-                        std::ofstream ofs(path, std::ios::binary);
-                        if (ofs) {
-                            ofs.write(raw_data.data(), raw_data.size());
-                            ofs.close();
-                        } else {
-                            WriteLog("Failed to save chunk: " + path);
-                            sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
-                            sqlite3_close(db);
-                            res.status = 500;
-                            res.set_content("Failed to save chunk", "text/plain");
-                            return;
+                
+                // Removed SHA-256 hash computation and validation
+                // Trust the hash provided by the frontend
+    
+                // Update reference count similar to batchUpdateRefCounts
+                const char* sql_select = "SELECT ref_count FROM chunk_references WHERE hash = ?;";
+                sqlite3_stmt* stmt_select;
+                int ref_count = 0;
+                bool hash_exists = false;
+    
+                if (sqlite3_prepare_v2(db, sql_select, -1, &stmt_select, nullptr) == SQLITE_OK) {
+                    sqlite3_bind_text(stmt_select, 1, hash.c_str(), -1, SQLITE_STATIC);
+                    if (sqlite3_step(stmt_select) == SQLITE_ROW) {
+                        ref_count = sqlite3_column_int(stmt_select, 0);
+                        hash_exists = true;
+                    }
+                    sqlite3_finalize(stmt_select);
+                } else {
+                    WriteLog("Failed to prepare SELECT for hash: " + hash);
+                }
+    
+                if (hash_exists) {
+                    // Increment existing ref_count
+                    const char* sql_update = "UPDATE chunk_references SET ref_count = ? WHERE hash = ?;";
+                    sqlite3_stmt* stmt_update;
+                    if (sqlite3_prepare_v2(db, sql_update, -1, &stmt_update, nullptr) == SQLITE_OK) {
+                        sqlite3_bind_int(stmt_update, 1, ref_count + 1);
+                        sqlite3_bind_text(stmt_update, 2, hash.c_str(), -1, SQLITE_STATIC);
+                        if (sqlite3_step(stmt_update) != SQLITE_DONE) {
+                            WriteLog("Failed to update ref_count for hash: " + hash);
                         }
+                        sqlite3_finalize(stmt_update);
+                    } else {
+                        WriteLog("Failed to prepare UPDATE for hash: " + hash);
                     }
-                    sqlite3_finalize(stmt_insert);
                 } else {
-                    WriteLog("Failed to prepare INSERT for hash: " + hash);
+                    // Insert new hash with ref_count = 1 and save chunk data
+                    const char* sql_insert = "INSERT INTO chunk_references (hash, ref_count) VALUES (?, 1);";
+                    sqlite3_stmt* stmt_insert;
+                    if (sqlite3_prepare_v2(db, sql_insert, -1, &stmt_insert, nullptr) == SQLITE_OK) {
+                        sqlite3_bind_text(stmt_insert, 1, hash.c_str(), -1, SQLITE_STATIC);
+                        if (sqlite3_step(stmt_insert) == SQLITE_DONE) {
+                            std::string path = CHUNK_DIR + "\\" + hash + ".bin";
+                            std::ofstream ofs(path, std::ios::binary);
+                            if (ofs) {
+                                ofs.write(raw_data.data(), raw_data.size());
+                                ofs.close();
+                            } else {
+                                WriteLog("Failed to save chunk: " + path);
+                                sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
+                                sqlite3_close(db);
+                                res.status = 500;
+                                res.set_content("Failed to save chunk", "text/plain");
+                                return;
+                            }
+                        }
+                        sqlite3_finalize(stmt_insert);
+                    } else {
+                        WriteLog("Failed to prepare INSERT for hash: " + hash);
+                    }
+                }
+    
+                // Insert into file_chunks
+                const char* sql_file_chunks = "INSERT INTO file_chunks (cid, chunk_index, hash) VALUES (?, ?, ?);";
+                sqlite3_stmt* stmt_file_chunks;
+                if (sqlite3_prepare_v2(db, sql_file_chunks, -1, &stmt_file_chunks, nullptr) == SQLITE_OK) {
+                    sqlite3_bind_text(stmt_file_chunks, 1, cid.c_str(), -1, SQLITE_STATIC);
+                    sqlite3_bind_int(stmt_file_chunks, 2, static_cast<int>(i) + 1);
+                    sqlite3_bind_text(stmt_file_chunks, 3, hash.c_str(), -1, SQLITE_STATIC);
+                    if (sqlite3_step(stmt_file_chunks) != SQLITE_DONE) {
+                        WriteLog("Failed to insert into file_chunks for CID: " + cid);
+                    }
+                    sqlite3_finalize(stmt_file_chunks);
+                } else {
+                    WriteLog("Failed to prepare file_chunks INSERT for CID: " + cid);
                 }
             }
-
-            // Insert into file_chunks
-            const char* sql_file_chunks = "INSERT INTO file_chunks (cid, chunk_index, hash) VALUES (?, ?, ?);";
-            sqlite3_stmt* stmt_file_chunks;
-            if (sqlite3_prepare_v2(db, sql_file_chunks, -1, &stmt_file_chunks, nullptr) == SQLITE_OK) {
-                sqlite3_bind_text(stmt_file_chunks, 1, cid.c_str(), -1, SQLITE_STATIC);
-                sqlite3_bind_int(stmt_file_chunks, 2, static_cast<int>(i) + 1);
-                sqlite3_bind_text(stmt_file_chunks, 3, hash.c_str(), -1, SQLITE_STATIC);
-                if (sqlite3_step(stmt_file_chunks) != SQLITE_DONE) {
-                    WriteLog("Failed to insert into file_chunks for CID: " + cid);
+    
+            // Insert into file_metadata
+            const char* sql_metadata = "INSERT INTO file_metadata (cid, original_filename) VALUES (?, ?);";
+            sqlite3_stmt* stmt_metadata;
+            if (sqlite3_prepare_v2(db, sql_metadata, -1, &stmt_metadata, nullptr) == SQLITE_OK) {
+                sqlite3_bind_text(stmt_metadata, 1, cid.c_str(), -1, SQLITE_STATIC);
+                sqlite3_bind_text(stmt_metadata, 2, original_filename.c_str(), -1, SQLITE_STATIC);
+                if (sqlite3_step(stmt_metadata) != SQLITE_DONE) {
+                    WriteLog("Failed to insert into file_metadata for CID: " + cid);
                 }
-                sqlite3_finalize(stmt_file_chunks);
+                sqlite3_finalize(stmt_metadata);
             } else {
-                WriteLog("Failed to prepare file_chunks INSERT for CID: " + cid);
+                WriteLog("Failed to prepare file_metadata INSERT");
             }
-        }
-
-        // Insert into file_metadata
-        const char* sql_metadata = "INSERT INTO file_metadata (cid, original_filename) VALUES (?, ?);";
-        sqlite3_stmt* stmt_metadata;
-        if (sqlite3_prepare_v2(db, sql_metadata, -1, &stmt_metadata, nullptr) == SQLITE_OK) {
-            sqlite3_bind_text(stmt_metadata, 1, cid.c_str(), -1, SQLITE_STATIC);
-            sqlite3_bind_text(stmt_metadata, 2, original_filename.c_str(), -1, SQLITE_STATIC);
-            if (sqlite3_step(stmt_metadata) != SQLITE_DONE) {
-                WriteLog("Failed to insert into file_metadata for CID: " + cid);
+    
+            if (sqlite3_exec(db, "COMMIT;", nullptr, nullptr, nullptr) != SQLITE_OK) {
+                WriteLog("Failed to commit transaction for CID: " + cid);
+                sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
+                sqlite3_close(db);
+                res.status = 500;
+                res.set_content("Transaction commit failed", "text/plain");
+                return;
             }
-            sqlite3_finalize(stmt_metadata);
-        } else {
-            WriteLog("Failed to prepare file_metadata INSERT");
-        }
-
-        if (sqlite3_exec(db, "COMMIT;", nullptr, nullptr, nullptr) != SQLITE_OK) {
-            WriteLog("Failed to commit transaction for CID: " + cid);
-            sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
+    
             sqlite3_close(db);
-            res.status = 500;
-            res.set_content("Transaction commit failed", "text/plain");
-            return;
+            WriteLog("Updated reference counts for " + std::to_string(hashes.size()) + " chunks for CID: " + cid);
+            res.status = 200;
+            res.set_content("Success", "text/plain");
         }
-
-        sqlite3_close(db);
-        WriteLog("Updated reference counts for " + std::to_string(hashes.size()) + " chunks for CID: " + cid);
-        res.status = 200;
-        res.set_content("Success", "text/plain");
-    }
-    catch (std::exception& ex) {
-        WriteLog(std::string("Exception in /store: ") + ex.what());
-        res.status = 500;
-        res.set_content("Server error", "text/plain");
-    }
-});
+        catch (std::exception& ex) {
+            WriteLog(std::string("Exception in /store: ") + ex.what());
+            res.status = 500;
+            res.set_content("Server error", "text/plain");
+        }
+    });
 
     server.Get("/file/:cid", [](const httplib::Request& req, httplib::Response& res) {
         std::string cid = req.path_params.at("cid");
