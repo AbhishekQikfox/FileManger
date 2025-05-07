@@ -1,0 +1,7 @@
+{
+    "chunk_size": 1048576,
+    "backend_host": "127.0.0.1",
+    "backend_port": 8081,
+    "server_port": 8080,
+    "log_file": "C:\\Users\\Training\\Desktop\\ProjectRoot\\FrontendService\\frontend.log"
+}

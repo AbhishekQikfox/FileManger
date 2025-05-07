@@ -193,3 +193,14 @@ Wed May  7 10:50:50 2025 - StorageService starting HTTP on port 8081
 Wed May  7 10:54:00 2025 - POST /store received, Content-Length=2796494
 Wed May  7 10:54:00 2025 - Storing CID=9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_f5c3200d6076e241 with 2 chunks
 Wed May  7 10:54:00 2025 - Updated reference counts for 2 chunks for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_f5c3200d6076e241
+Wed May  7 11:08:34 2025 - POST /store received, Content-Length=2796494
+Wed May  7 11:08:34 2025 - Storing CID=9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_1af44c98716a5241 with 2 chunks
+Wed May  7 11:08:34 2025 - Updated reference counts for 2 chunks for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_1af44c98716a5241
+Wed May  7 11:23:04 2025 - POST /store received, Content-Length=2796494
+Wed May  7 11:23:04 2025 - Storing CID=9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_f376bb2b92e8ae71 with 2 chunks
+Wed May  7 11:23:04 2025 - Updated reference counts for 2 chunks for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_f376bb2b92e8ae71
+Wed May  7 11:27:46 2025 - Database initialized (file_chunks, chunk_references, file_metadata).
+Wed May  7 11:27:46 2025 - StorageService starting HTTP on port 8081
+Wed May  7 11:35:09 2025 - POST /store received, Content-Length=68918138
+Wed May  7 11:35:09 2025 - Storing CID=d9890958fee79a61c58ec629ec93f437bda0b4dfee773f422f001c7099d9ea99_f2fc9d37afac893d with 50 chunks
+Wed May  7 11:35:11 2025 - Updated reference counts for 50 chunks for CID: d9890958fee79a61c58ec629ec93f437bda0b4dfee773f422f001c7099d9ea99_f2fc9d37afac893d
