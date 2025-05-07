@@ -271,67 +271,69 @@ void RunServer() {
             WriteLog("Upload rejected: Missing 'file' field");
             return;
         }
+        
         const auto& file = req.get_file_value("file");
         WriteLog("Received upload: " + file.filename + " (" + std::to_string(file.content.size()) + " bytes)");
-        if (file.content.size() < 1024 * 1024) {
-            std::vector<char> data(file.content.begin(), file.content.end());
-            std::vector<std::string> chunkHashes;
-            std::vector<std::string> encodedChunks;
-            size_t offset = 0;
-            size_t chunkCount = 0;
-            while (offset < data.size()) {
-                size_t len = std::min(CHUNK_SIZE, data.size() - offset);
-                std::vector<char> chunk(data.begin() + offset, data.begin() + offset + len);
-                std::string hash = computeHash(chunk);
-                chunkHashes.push_back(hash);
-                std::string encodedChunk = base64Encode(chunk);
-                encodedChunks.push_back(encodedChunk);
-                offset += len;
-                chunkCount++;
-            }
-            WriteLog("File divided into " + std::to_string(chunkCount) + " chunks");
-            std::string cid = generateCID(chunkHashes);
-            WriteLog("Generated CID: " + cid);
-            json payload;
-            payload["cid"] = cid;
-            payload["chunks"] = chunkHashes;
-            payload["data"] = encodedChunks;
-            payload["original_filename"] = file.filename;
-            std::string jsonStr = payload.dump();
-            WriteLog("JSON payload size: " + std::to_string(jsonStr.size()) + " bytes");
-            if (!SendToBackendHTTP(jsonStr)) {
-                WriteLog("Failed to send to backend");
-                res.status = 500;
-                res.set_content("Failed to send to backend", "text/plain");
-                return;
-            }
-            WriteLog("Successfully sent to backend. Returning CID to client.");
-            res.status = 200;
-            res.set_content(cid, "text/plain");
-            return;
-        }
+        
+        // Create a thread pool with the number of hardware threads available
+        unsigned int numThreads = std::thread::hardware_concurrency();
+        if (numThreads == 0) numThreads = 4; // Default to 4 if we can't detect
+        ThreadPool pool(numThreads);
+        WriteLog("Created thread pool with " + std::to_string(numThreads) + " threads");
+        
         std::vector<std::string> chunkHashes;
         std::vector<std::string> encodedChunks;
-        const size_t processSize = 1024 * 1024;
-        for (size_t fileOffset = 0; fileOffset < file.content.size(); fileOffset += processSize) {
-            size_t processLength = std::min(processSize, file.content.size() - fileOffset);
-            std::vector<char> processBuffer(file.content.begin() + fileOffset,
-                                            file.content.begin() + fileOffset + processLength);
-            size_t offset = 0;
-            while (offset < processBuffer.size()) {
-                size_t len = std::min(CHUNK_SIZE, processBuffer.size() - offset);
-                std::vector<char> chunk(processBuffer.begin() + offset,
-                                        processBuffer.begin() + offset + len);
-                std::string hash = computeHash(chunk);
-                chunkHashes.push_back(hash);
-                std::string encodedChunk = base64Encode(chunk);
-                encodedChunks.push_back(encodedChunk);
-                offset += len;
+        std::vector<std::future<std::string>> futureResults;
+        
+        // Process the file in chunks
+        std::vector<char> data(file.content.begin(), file.content.end());
+        size_t totalChunks = (data.size() + CHUNK_SIZE - 1) / CHUNK_SIZE; // Calculate total chunks
+        chunkHashes.resize(totalChunks);
+        encodedChunks.resize(totalChunks);
+        
+        WriteLog("Processing file in " + std::to_string(totalChunks) + " chunks");
+        
+        // Submit tasks to the thread pool
+        for (size_t i = 0; i < totalChunks; i++) {
+            size_t offset = i * CHUNK_SIZE;
+            size_t len = std::min(CHUNK_SIZE, data.size() - offset);
+            
+            // Copy the chunk for the lambda to process
+            std::vector<char> chunkCopy(data.begin() + offset, data.begin() + offset + len);
+            
+            // Create a task that processes a chunk and returns the hash
+            auto task = [chunkCopy, i]() -> std::string {
+                // Compute hash
+                std::string hash = computeHash(chunkCopy);
+                // Encode chunk
+                std::string encodedChunk = base64Encode(chunkCopy);
+                // Return hash+encoded as a combined string that we'll parse later
+                return hash + "|||" + encodedChunk;
+            };
+            
+            // Submit the task to the thread pool and store the future result
+            futureResults.push_back(pool.enqueue(task));
+        }
+        
+        // Wait for all tasks to complete and collect results
+        for (size_t i = 0; i < totalChunks; i++) {
+            std::string result = futureResults[i].get();
+            
+            // Parse the result to get the hash and encoded chunk
+            size_t delimiterPos = result.find("|||");
+            if (delimiterPos != std::string::npos) {
+                chunkHashes[i] = result.substr(0, delimiterPos);
+                encodedChunks[i] = result.substr(delimiterPos + 3);
             }
         }
-        WriteLog("File divided into " + std::to_string(chunkHashes.size()) + " chunks");
+        
+        WriteLog("All chunks processed in parallel");
+        
+        // Generate CID from the chunk hashes
         std::string cid = generateCID(chunkHashes);
         WriteLog("Generated CID: " + cid);
+        
+        // Create the JSON payload
         json payload;
         payload["cid"] = cid;
         payload["chunks"] = chunkHashes;
@@ -339,12 +341,15 @@ void RunServer() {
         payload["original_filename"] = file.filename;
         std::string jsonStr = payload.dump();
         WriteLog("JSON payload size: " + std::to_string(jsonStr.size()) + " bytes");
+        
+        // Send to backend
         if (!SendToBackendHTTP(jsonStr)) {
             WriteLog("Failed to send to backend");
             res.status = 500;
             res.set_content("Failed to send to backend", "text/plain");
             return;
         }
+        
         WriteLog("Successfully sent to backend. Returning CID to client.");
         res.status = 200;
         res.set_content(cid, "text/plain");
