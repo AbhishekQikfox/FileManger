@@ -19,7 +19,7 @@
 #include <openssl/buffer.h>
 #include <openssl/sha.h>
 #include <iomanip>
-
+#define CPPHTTPLIB_OPENSSL_SUPPORT
 #include "httplib.h"
 
 namespace fs = std::filesystem;
@@ -36,7 +36,7 @@ std::atomic<bool>         running(false);
 
 std::mutex                serverMutex;
 std::condition_variable   serverCV;
-httplib::Server*          serverPtr = nullptr;
+httplib::SSLServer* serverPtr = nullptr;
 
 void WriteLog(const std::string& msg) {
     std::ofstream log(DB_DIR + "\\backend.log", std::ios::app);
@@ -226,9 +226,14 @@ std::vector<char> ReadFileToVector(const std::string& filePath) {
 void RunHTTPServer() {
     fs::create_directories(CHUNK_DIR);
     InitializeDatabase();
-    WriteLog("StorageService starting HTTP on port " + std::to_string(HTTP_PORT));
+    WriteLog("StorageService starting HTTPS on port " + std::to_string(HTTP_PORT));
 
-    httplib::Server server;
+    // Define paths to certificate and key files
+    const std::string cert_path = "C:\\Users\\Training\\Desktop\\ProjectRoot\\cert.pem";
+    const std::string key_path = "C:\\Users\\Training\\Desktop\\ProjectRoot\\key.pem";
+
+    // Initialize SSLServer
+    httplib::SSLServer server(cert_path.c_str(), key_path.c_str());
     server.set_payload_max_length(100 * 1024 * 1024); // Set to 100MB to handle large file uploads
     server.set_read_timeout(60, 0); // Set read timeout to 60 seconds
 

@@ -14,6 +14,7 @@
 #include <nlohmann/json.hpp>
 #include <sstream>
 #include <algorithm>
+#define CPPHTTPLIB_OPENSSL_SUPPORT
 #include "httplib.h"
 #include <windows.h>
 #include <ctime>
@@ -141,7 +142,7 @@ static std::atomic<bool> paused(false);
 std::atomic<bool> running(false);
 std::mutex serverMutex;
 std::condition_variable serverCV;
-httplib::Server* serverPtr = nullptr;
+httplib::SSLServer* serverPtr = nullptr;
 
 class ThreadPool {
 public:
@@ -205,9 +206,11 @@ std::string computeHash(const std::vector<char>& data) {
 
 std::pair<std::vector<char>, std::string> GetFileFromBackend(const std::string& cid) {
     WriteLog("Retrieving file with CID: " + cid + " from backend");
-    httplib::Client client(BACKEND_HOST, BACKEND_PORT);
+    httplib::Client client("https://" + BACKEND_HOST + ":" + std::to_string(BACKEND_PORT));
     client.set_connection_timeout(10);
     client.set_read_timeout(60);
+    // Disable certificate verification for localhost testing (remove in production)
+    client.enable_server_certificate_verification(false);
     auto res = client.Get("/file/" + cid);
     if (!res) {
         WriteLog("Failed to connect to backend service");
@@ -248,11 +251,12 @@ bool SendToBackendHTTP(const httplib::MultipartFormDataItems& items) {
         WriteLog(log);
     }
 
-    httplib::Client client(BACKEND_HOST, BACKEND_PORT);
+    httplib::Client client("https://" + BACKEND_HOST + ":" + std::to_string(BACKEND_PORT));
     client.set_connection_timeout(10);
     client.set_read_timeout(60);
+    // Disable certificate verification for localhost testing (remove in production)
+    client.enable_server_certificate_verification(false);
     
-    // Send the original items directly without copying
     auto res = client.Post("/store", items);
     
     if (!res) {
@@ -269,8 +273,12 @@ bool SendToBackendHTTP(const httplib::MultipartFormDataItems& items) {
 }
 
 void RunServer() {
-    httplib::Server server;
+    // Define paths to certificate and key files
+    const std::string cert_path = "C:\\Users\\Training\\Desktop\\ProjectRoot\\cert.pem";
+    const std::string key_path = "C:\\Users\\Training\\Desktop\\ProjectRoot\\key.pem";
 
+    // Initialize SSLServer instead of Server
+    httplib::SSLServer server(cert_path.c_str(), key_path.c_str());
     server.Post("/upload", [](const httplib::Request& req, httplib::Response& res) {
         if (!req.has_file("file")) {
             res.status = 400;
@@ -386,7 +394,8 @@ void RunServer() {
         payload["new_data"] = new_encoded_chunks;
         payload["new_filename"] = file.filename;
         std::string json_str = payload.dump();
-        httplib::Client client(BACKEND_HOST, BACKEND_PORT);
+        httplib::Client client("https://" + BACKEND_HOST + ":" + std::to_string(BACKEND_PORT));
+        client.enable_server_certificate_verification(false); // For testing
         auto backend_res = client.Post("/update", json_str, "application/json");
         if (backend_res && backend_res->status == 200) {
             res.status = 200;
@@ -400,9 +409,10 @@ void RunServer() {
     server.Delete("/files/:cid", [](const httplib::Request& req, httplib::Response& res) {
         std::string cid = trim(req.path_params.at("cid"));
         WriteLog("Received DELETE request for CID: " + cid + ", hex: " + stringToHex(cid));
-        httplib::Client client(BACKEND_HOST, BACKEND_PORT);
+        httplib::Client client("https://" + BACKEND_HOST + ":" + std::to_string(BACKEND_PORT));
         client.set_connection_timeout(10);
         client.set_read_timeout(60);
+        client.enable_server_certificate_verification(false); // For testing
         WriteLog("Sending DELETE request to backend for CID: " + cid);
         auto backend_res = client.Delete("/file/" + cid);
         if (backend_res && backend_res->status == 200) {
@@ -428,8 +438,10 @@ void RunServer() {
         serverCV.notify_one();
     }
 
-    WriteLog("Server started on port " + std::to_string(SERVER_PORT));
-    server.listen("0.0.0.0", SERVER_PORT);
+    WriteLog("Server started on port " + std::to_string(SERVER_PORT) + " with HTTPS");
+    if (!server.listen("0.0.0.0", SERVER_PORT)) {
+        WriteLog("Failed to start HTTPS server on port " + std::to_string(SERVER_PORT));
+    }
     WriteLog("Server stopped");
 }
 
