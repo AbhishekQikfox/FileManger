@@ -1,12 +1,14 @@
 cmake_minimum_required(VERSION 3.15)
-project(FileManager)
+project(StorageService)
 
 set(CMAKE_CXX_STANDARD 17)
 
 find_package(OpenSSL REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME}
-    main.cpp  # Your source file name
+    StorageService.cpp
+    sqlite3.c
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE
@@ -16,4 +18,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 target_link_libraries(${PROJECT_NAME} PRIVATE
     OpenSSL::SSL
     OpenSSL::Crypto
+    advapi32
+    ws2_32
+    nlohmann_json::nlohmann_json
 )
