@@ -20,3 +20,210 @@
 2025-05-07 17:52:16.646 - Connecting to backend service at 127.0.0.1:8081
 2025-05-07 17:52:19.222 - Successfully sent metadata to backend. Response: Success
 2025-05-07 17:52:19.222 - Successfully sent to backend. Returning CID to client.
+2025-05-08 09:45:00.403 - Frontend service starting with config: {"backend_host":"127.0.0.1","backend_port":8081,"chunk_size":1048576,"log_file":"C:\\Users\\Training\\Desktop\\ProjectRoot\\FrontendService\\frontend.log","server_port":8080}
+2025-05-08 09:45:00.405 - Server started on port 8080
+2025-05-08 09:46:54.433 - Received upload: example_2_5mb.txt (2621950 bytes)
+2025-05-08 09:46:54.433 - Created thread pool with 8 threads
+2025-05-08 09:46:54.434 - Processing file in 3 chunks
+2025-05-08 09:46:54.467 - All chunks processed in parallel
+2025-05-08 09:46:54.469 - Generated CID: 93abb34e0efa37b8f502b8686aa8fbc7771d99edadd957341c87b155977d54d6_ee82968ec333f67a
+2025-05-08 09:46:54.498 - JSON payload size: 3496301 bytes
+2025-05-08 09:46:54.499 - Sending to backend.
+2025-05-08 09:46:54.499 - Connecting to backend service at 127.0.0.1:8081
+2025-05-08 09:46:54.585 - Successfully sent metadata to backend. Response: Success
+2025-05-08 09:46:54.585 - Successfully sent to backend. Returning CID to client.
+2025-05-08 09:55:54.128 - Server stopped
+2025-05-08 10:01:04.944 - Frontend service starting with config: {"backend_host":"127.0.0.1","backend_port":8081,"chunk_size":1048576,"log_file":"C:\\Users\\Training\\Desktop\\ProjectRoot\\FrontendService\\frontend.log","server_port":8080}
+2025-05-08 10:01:04.947 - Server started on port 8080
+2025-05-08 10:02:09.335 - Received upload: 50mb.txt (51685773 bytes)
+2025-05-08 10:02:09.336 - Created thread pool with 8 threads
+2025-05-08 10:02:09.346 - Processing file in 50 chunks
+2025-05-08 10:02:09.409 - All chunks hashed in parallel
+2025-05-08 10:02:09.410 - Generated CID: d9890958fee79a61c58ec629ec93f437bda0b4dfee773f422f001c7099d9ea99_264a3f5e74d7cf85
+2025-05-08 10:02:09.434 - Sending multipart/form-data to backend
+2025-05-08 10:02:09.435 - Connecting to backend service at 127.0.0.1:8081
+2025-05-08 10:02:09.742 - Backend service returned error: 400 - Missing required form fields
+2025-05-08 10:02:09.742 - Failed to send to backend
+2025-05-08 10:09:45.583 - Received upload: 50mb.txt (51685773 bytes)
+2025-05-08 10:09:45.584 - Created thread pool with 8 threads
+2025-05-08 10:09:45.594 - Processing file in 50 chunks
+2025-05-08 10:09:45.653 - All chunks hashed in parallel
+2025-05-08 10:09:45.653 - Generated CID: d9890958fee79a61c58ec629ec93f437bda0b4dfee773f422f001c7099d9ea99_8f3a06fb0dc9f67e
+2025-05-08 10:09:45.678 - Sending multipart/form-data to backend
+2025-05-08 10:09:45.678 - Connecting to backend service at 127.0.0.1:8081
+2025-05-08 10:09:45.956 - Backend service returned error: 400 - Missing required form fields
+2025-05-08 10:09:45.956 - Failed to send to backend
+2025-05-08 10:14:20.982 - Received upload: 50mb.txt (51685773 bytes)
+2025-05-08 10:14:20.982 - Created thread pool with 8 threads
+2025-05-08 10:14:20.992 - Processing file in 50 chunks
+2025-05-08 10:14:21.055 - All chunks hashed in parallel
+2025-05-08 10:14:21.055 - Generated CID: d9890958fee79a61c58ec629ec93f437bda0b4dfee773f422f001c7099d9ea99_47c6f6e75850553f
+2025-05-08 10:14:21.081 - Sending multipart/form-data to backend
+2025-05-08 10:14:21.081 - Connecting to backend service at 127.0.0.1:8081
+2025-05-08 10:14:21.352 - Backend service returned error: 400 - Missing required form fields
+2025-05-08 10:14:21.352 - Failed to send to backend
+2025-05-08 10:20:46.131 - Received upload: 50mb.txt (51685773 bytes)
+2025-05-08 10:20:46.132 - Created thread pool with 8 threads
+2025-05-08 10:20:46.143 - Processing file in 50 chunks
+2025-05-08 10:20:46.204 - All chunks hashed in parallel
+2025-05-08 10:20:46.204 - Generated CID: d9890958fee79a61c58ec629ec93f437bda0b4dfee773f422f001c7099d9ea99_2d096b9f8f12266f
+2025-05-08 10:20:46.228 - Sending multipart/form-data to backend
+2025-05-08 10:20:46.228 - Connecting to backend service at 127.0.0.1:8081
+2025-05-08 10:20:46.509 - Backend service returned error: 400 - Missing required form fields
+2025-05-08 10:20:46.509 - Failed to send to backend
+2025-05-08 10:23:34.718 - Server stopped
+2025-05-08 10:25:25.514 - Frontend service starting with config: {"backend_host":"127.0.0.1","backend_port":8081,"chunk_size":1048576,"log_file":"C:\\Users\\Training\\Desktop\\ProjectRoot\\FrontendService\\frontend.log","server_port":8080}
+2025-05-08 10:25:25.516 - Server started on port 8080
+2025-05-08 10:25:39.358 - Received upload: 50mb.txt (51685773 bytes)
+2025-05-08 10:25:39.358 - Created thread pool with 8 threads
+2025-05-08 10:25:39.369 - Processing file in 50 chunks
+2025-05-08 10:25:39.428 - All chunks hashed in parallel
+2025-05-08 10:25:39.429 - Generated CID: d9890958fee79a61c58ec629ec93f437bda0b4dfee773f422f001c7099d9ea99_6aa2207cb32affb5
+2025-05-08 10:25:39.456 - Sending multipart/form-data to backend
+2025-05-08 10:25:39.456 - Connecting to backend service at 127.0.0.1:8081
+2025-05-08 10:25:39.786 - Backend service returned error: 400 - Missing required form fields
+2025-05-08 10:25:39.789 - Failed to send to backend
+2025-05-08 10:31:31.624 - Server stopped
+2025-05-08 10:40:34.330 - Frontend service starting with config: {"backend_host":"127.0.0.1","backend_port":8081,"chunk_size":1048576,"log_file":"C:\\Users\\Training\\Desktop\\ProjectRoot\\FrontendService\\frontend.log","server_port":8080}
+2025-05-08 10:40:34.332 - Server started on port 8080
+2025-05-08 10:40:43.547 - Received upload: 50mb.txt (51685773 bytes)
+2025-05-08 10:40:43.548 - Created thread pool with 8 threads
+2025-05-08 10:40:43.558 - Processing file in 50 chunks
+2025-05-08 10:40:43.625 - All chunks hashed in parallel
+2025-05-08 10:40:43.625 - Generated CID: d9890958fee79a61c58ec629ec93f437bda0b4dfee773f422f001c7099d9ea99_c670b750d5ab4025
+2025-05-08 10:40:43.652 - Sending multipart/form-data to backend
+2025-05-08 10:40:43.652 - Connecting to backend service at 127.0.0.1:8081
+2025-05-08 10:40:43.652 - Sending multipart form data items:
+2025-05-08 10:40:43.652 -   name: cid, content_type: text/plain, content_length: 81
+2025-05-08 10:40:43.652 -   name: original_filename, content_type: text/plain, content_length: 8
+2025-05-08 10:40:43.652 -   name: chunk_hashes, content_type: application/json, content_length: 3351
+2025-05-08 10:40:43.652 -   name: chunk_0, content_type: application/octet-stream, filename: chunk_0.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_1, content_type: application/octet-stream, filename: chunk_1.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_2, content_type: application/octet-stream, filename: chunk_2.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_3, content_type: application/octet-stream, filename: chunk_3.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_4, content_type: application/octet-stream, filename: chunk_4.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_5, content_type: application/octet-stream, filename: chunk_5.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_6, content_type: application/octet-stream, filename: chunk_6.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_7, content_type: application/octet-stream, filename: chunk_7.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_8, content_type: application/octet-stream, filename: chunk_8.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_9, content_type: application/octet-stream, filename: chunk_9.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_10, content_type: application/octet-stream, filename: chunk_10.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_11, content_type: application/octet-stream, filename: chunk_11.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_12, content_type: application/octet-stream, filename: chunk_12.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_13, content_type: application/octet-stream, filename: chunk_13.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_14, content_type: application/octet-stream, filename: chunk_14.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_15, content_type: application/octet-stream, filename: chunk_15.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_16, content_type: application/octet-stream, filename: chunk_16.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_17, content_type: application/octet-stream, filename: chunk_17.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_18, content_type: application/octet-stream, filename: chunk_18.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_19, content_type: application/octet-stream, filename: chunk_19.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_20, content_type: application/octet-stream, filename: chunk_20.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_21, content_type: application/octet-stream, filename: chunk_21.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_22, content_type: application/octet-stream, filename: chunk_22.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_23, content_type: application/octet-stream, filename: chunk_23.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_24, content_type: application/octet-stream, filename: chunk_24.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_25, content_type: application/octet-stream, filename: chunk_25.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_26, content_type: application/octet-stream, filename: chunk_26.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_27, content_type: application/octet-stream, filename: chunk_27.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_28, content_type: application/octet-stream, filename: chunk_28.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_29, content_type: application/octet-stream, filename: chunk_29.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_30, content_type: application/octet-stream, filename: chunk_30.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_31, content_type: application/octet-stream, filename: chunk_31.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_32, content_type: application/octet-stream, filename: chunk_32.bin, content_length: 1048576
+2025-05-08 10:40:43.652 -   name: chunk_33, content_type: application/octet-stream, filename: chunk_33.bin, content_length: 1048576
+2025-05-08 10:40:43.653 -   name: chunk_34, content_type: application/octet-stream, filename: chunk_34.bin, content_length: 1048576
+2025-05-08 10:40:43.653 -   name: chunk_35, content_type: application/octet-stream, filename: chunk_35.bin, content_length: 1048576
+2025-05-08 10:40:43.653 -   name: chunk_36, content_type: application/octet-stream, filename: chunk_36.bin, content_length: 1048576
+2025-05-08 10:40:43.653 -   name: chunk_37, content_type: application/octet-stream, filename: chunk_37.bin, content_length: 1048576
+2025-05-08 10:40:43.653 -   name: chunk_38, content_type: application/octet-stream, filename: chunk_38.bin, content_length: 1048576
+2025-05-08 10:40:43.653 -   name: chunk_39, content_type: application/octet-stream, filename: chunk_39.bin, content_length: 1048576
+2025-05-08 10:40:43.653 -   name: chunk_40, content_type: application/octet-stream, filename: chunk_40.bin, content_length: 1048576
+2025-05-08 10:40:43.653 -   name: chunk_41, content_type: application/octet-stream, filename: chunk_41.bin, content_length: 1048576
+2025-05-08 10:40:43.653 -   name: chunk_42, content_type: application/octet-stream, filename: chunk_42.bin, content_length: 1048576
+2025-05-08 10:40:43.653 -   name: chunk_43, content_type: application/octet-stream, filename: chunk_43.bin, content_length: 1048576
+2025-05-08 10:40:43.653 -   name: chunk_44, content_type: application/octet-stream, filename: chunk_44.bin, content_length: 1048576
+2025-05-08 10:40:43.653 -   name: chunk_45, content_type: application/octet-stream, filename: chunk_45.bin, content_length: 1048576
+2025-05-08 10:40:43.653 -   name: chunk_46, content_type: application/octet-stream, filename: chunk_46.bin, content_length: 1048576
+2025-05-08 10:40:43.653 -   name: chunk_47, content_type: application/octet-stream, filename: chunk_47.bin, content_length: 1048576
+2025-05-08 10:40:43.653 -   name: chunk_48, content_type: application/octet-stream, filename: chunk_48.bin, content_length: 1048576
+2025-05-08 10:40:43.653 -   name: chunk_49, content_type: application/octet-stream, filename: chunk_49.bin, content_length: 305549
+2025-05-08 10:40:43.973 - Backend service returned error: 400 - Missing required form fields
+2025-05-08 10:40:43.973 - Failed to send to backend
+2025-05-08 10:47:45.576 - Received upload: file_2mb.txt (2097152 bytes)
+2025-05-08 10:47:45.577 - Created thread pool with 8 threads
+2025-05-08 10:47:45.577 - Processing file in 2 chunks
+2025-05-08 10:47:45.582 - All chunks hashed in parallel
+2025-05-08 10:47:45.583 - Generated CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_adc43b04fdc2fc3e
+2025-05-08 10:47:45.584 - Sending multipart/form-data to backend
+2025-05-08 10:47:45.584 - Connecting to backend service at 127.0.0.1:8081
+2025-05-08 10:47:45.584 - Sending multipart form data items:
+2025-05-08 10:47:45.584 -   name: cid, content_type: text/plain, content_length: 81
+2025-05-08 10:47:45.584 -   name: original_filename, content_type: text/plain, content_length: 12
+2025-05-08 10:47:45.584 -   name: chunk_hashes, content_type: application/json, content_length: 135
+2025-05-08 10:47:45.584 -   name: chunk_0, content_type: application/octet-stream, filename: chunk_0.bin, content_length: 1048576
+2025-05-08 10:47:45.584 -   name: chunk_1, content_type: application/octet-stream, filename: chunk_1.bin, content_length: 1048576
+2025-05-08 10:47:45.617 - Successfully sent data to backend. Response: Success
+2025-05-08 10:47:45.617 - Successfully sent to backend. Returning CID to client.
+2025-05-08 10:47:59.781 - Received upload: 50mb.txt (51685773 bytes)
+2025-05-08 10:47:59.782 - Created thread pool with 8 threads
+2025-05-08 10:47:59.791 - Processing file in 50 chunks
+2025-05-08 10:47:59.851 - All chunks hashed in parallel
+2025-05-08 10:47:59.851 - Generated CID: d9890958fee79a61c58ec629ec93f437bda0b4dfee773f422f001c7099d9ea99_a377a74611f54060
+2025-05-08 10:47:59.876 - Sending multipart/form-data to backend
+2025-05-08 10:47:59.876 - Connecting to backend service at 127.0.0.1:8081
+2025-05-08 10:47:59.876 - Sending multipart form data items:
+2025-05-08 10:47:59.876 -   name: cid, content_type: text/plain, content_length: 81
+2025-05-08 10:47:59.876 -   name: original_filename, content_type: text/plain, content_length: 8
+2025-05-08 10:47:59.876 -   name: chunk_hashes, content_type: application/json, content_length: 3351
+2025-05-08 10:47:59.876 -   name: chunk_0, content_type: application/octet-stream, filename: chunk_0.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_1, content_type: application/octet-stream, filename: chunk_1.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_2, content_type: application/octet-stream, filename: chunk_2.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_3, content_type: application/octet-stream, filename: chunk_3.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_4, content_type: application/octet-stream, filename: chunk_4.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_5, content_type: application/octet-stream, filename: chunk_5.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_6, content_type: application/octet-stream, filename: chunk_6.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_7, content_type: application/octet-stream, filename: chunk_7.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_8, content_type: application/octet-stream, filename: chunk_8.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_9, content_type: application/octet-stream, filename: chunk_9.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_10, content_type: application/octet-stream, filename: chunk_10.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_11, content_type: application/octet-stream, filename: chunk_11.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_12, content_type: application/octet-stream, filename: chunk_12.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_13, content_type: application/octet-stream, filename: chunk_13.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_14, content_type: application/octet-stream, filename: chunk_14.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_15, content_type: application/octet-stream, filename: chunk_15.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_16, content_type: application/octet-stream, filename: chunk_16.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_17, content_type: application/octet-stream, filename: chunk_17.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_18, content_type: application/octet-stream, filename: chunk_18.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_19, content_type: application/octet-stream, filename: chunk_19.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_20, content_type: application/octet-stream, filename: chunk_20.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_21, content_type: application/octet-stream, filename: chunk_21.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_22, content_type: application/octet-stream, filename: chunk_22.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_23, content_type: application/octet-stream, filename: chunk_23.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_24, content_type: application/octet-stream, filename: chunk_24.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_25, content_type: application/octet-stream, filename: chunk_25.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_26, content_type: application/octet-stream, filename: chunk_26.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_27, content_type: application/octet-stream, filename: chunk_27.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_28, content_type: application/octet-stream, filename: chunk_28.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_29, content_type: application/octet-stream, filename: chunk_29.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_30, content_type: application/octet-stream, filename: chunk_30.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_31, content_type: application/octet-stream, filename: chunk_31.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_32, content_type: application/octet-stream, filename: chunk_32.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_33, content_type: application/octet-stream, filename: chunk_33.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_34, content_type: application/octet-stream, filename: chunk_34.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_35, content_type: application/octet-stream, filename: chunk_35.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_36, content_type: application/octet-stream, filename: chunk_36.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_37, content_type: application/octet-stream, filename: chunk_37.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_38, content_type: application/octet-stream, filename: chunk_38.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_39, content_type: application/octet-stream, filename: chunk_39.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_40, content_type: application/octet-stream, filename: chunk_40.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_41, content_type: application/octet-stream, filename: chunk_41.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_42, content_type: application/octet-stream, filename: chunk_42.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_43, content_type: application/octet-stream, filename: chunk_43.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_44, content_type: application/octet-stream, filename: chunk_44.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_45, content_type: application/octet-stream, filename: chunk_45.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_46, content_type: application/octet-stream, filename: chunk_46.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_47, content_type: application/octet-stream, filename: chunk_47.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_48, content_type: application/octet-stream, filename: chunk_48.bin, content_length: 1048576
+2025-05-08 10:47:59.876 -   name: chunk_49, content_type: application/octet-stream, filename: chunk_49.bin, content_length: 305549
+2025-05-08 10:48:00.266 - Successfully sent data to backend. Response: Success
+2025-05-08 10:48:00.266 - Successfully sent to backend. Returning CID to client.

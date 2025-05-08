@@ -114,3 +114,271 @@
 2025-05-07 18:02:48.946 - POST /store received, Content-Length=68918138
 2025-05-07 18:02:50.077 - Storing CID=d9890958fee79a61c58ec629ec93f437bda0b4dfee773f422f001c7099d9ea99_b44bdab404e9ad3a with 50 chunks
 2025-05-07 18:02:51.399 - Updated reference counts for 50 chunks for CID: d9890958fee79a61c58ec629ec93f437bda0b4dfee773f422f001c7099d9ea99_b44bdab404e9ad3a
+2025-05-08 09:44:54.534 - Database initialized (file_chunks, chunk_references, file_metadata).
+2025-05-08 09:44:54.535 - StorageService starting HTTP on port 8081
+2025-05-08 09:46:54.523 - POST /store received, Content-Length=3496301
+2025-05-08 09:46:54.541 - Storing CID=93abb34e0efa37b8f502b8686aa8fbc7771d99edadd957341c87b155977d54d6_ee82968ec333f67a with 3 chunks
+2025-05-08 09:46:54.583 - Updated reference counts for 3 chunks for CID: 93abb34e0efa37b8f502b8686aa8fbc7771d99edadd957341c87b155977d54d6_ee82968ec333f67a
+2025-05-08 10:01:00.256 - Database initialized (file_chunks, chunk_references, file_metadata).
+2025-05-08 10:01:00.257 - StorageService starting HTTP on port 8081
+2025-05-08 10:02:09.733 - POST /store received with multipart/form-data
+2025-05-08 10:02:09.734 - Missing required form fields
+2025-05-08 10:09:35.249 - Database initialized (file_chunks, chunk_references, file_metadata).
+2025-05-08 10:09:35.250 - StorageService starting HTTP on port 8081
+2025-05-08 10:09:45.946 - POST /store received with multipart/form-data
+2025-05-08 10:09:45.946 - Missing required form fields
+2025-05-08 10:14:13.025 - Database initialized (file_chunks, chunk_references, file_metadata).
+2025-05-08 10:14:13.026 - StorageService starting HTTP on port 8081
+2025-05-08 10:14:21.345 - POST /store received with multipart/form-data
+2025-05-08 10:14:21.345 - Missing required form fields
+2025-05-08 10:20:32.260 - Database initialized (file_chunks, chunk_references, file_metadata).
+2025-05-08 10:20:32.261 - StorageService starting HTTP on port 8081
+2025-05-08 10:20:46.488 - POST /store received with multipart/form-data
+2025-05-08 10:20:46.488 - Received parameters:
+2025-05-08 10:20:46.489 - Received files:
+2025-05-08 10:20:46.489 -   chunk_0: chunk_0.bin
+2025-05-08 10:20:46.489 -   chunk_1: chunk_1.bin
+2025-05-08 10:20:46.490 -   chunk_10: chunk_10.bin
+2025-05-08 10:20:46.490 -   chunk_11: chunk_11.bin
+2025-05-08 10:20:46.490 -   chunk_12: chunk_12.bin
+2025-05-08 10:20:46.490 -   chunk_13: chunk_13.bin
+2025-05-08 10:20:46.491 -   chunk_14: chunk_14.bin
+2025-05-08 10:20:46.491 -   chunk_15: chunk_15.bin
+2025-05-08 10:20:46.491 -   chunk_16: chunk_16.bin
+2025-05-08 10:20:46.491 -   chunk_17: chunk_17.bin
+2025-05-08 10:20:46.492 -   chunk_18: chunk_18.bin
+2025-05-08 10:20:46.492 -   chunk_19: chunk_19.bin
+2025-05-08 10:20:46.492 -   chunk_2: chunk_2.bin
+2025-05-08 10:20:46.492 -   chunk_20: chunk_20.bin
+2025-05-08 10:20:46.493 -   chunk_21: chunk_21.bin
+2025-05-08 10:20:46.493 -   chunk_22: chunk_22.bin
+2025-05-08 10:20:46.493 -   chunk_23: chunk_23.bin
+2025-05-08 10:20:46.493 -   chunk_24: chunk_24.bin
+2025-05-08 10:20:46.494 -   chunk_25: chunk_25.bin
+2025-05-08 10:20:46.494 -   chunk_26: chunk_26.bin
+2025-05-08 10:20:46.494 -   chunk_27: chunk_27.bin
+2025-05-08 10:20:46.494 -   chunk_28: chunk_28.bin
+2025-05-08 10:20:46.495 -   chunk_29: chunk_29.bin
+2025-05-08 10:20:46.495 -   chunk_3: chunk_3.bin
+2025-05-08 10:20:46.495 -   chunk_30: chunk_30.bin
+2025-05-08 10:20:46.495 -   chunk_31: chunk_31.bin
+2025-05-08 10:20:46.496 -   chunk_32: chunk_32.bin
+2025-05-08 10:20:46.496 -   chunk_33: chunk_33.bin
+2025-05-08 10:20:46.496 -   chunk_34: chunk_34.bin
+2025-05-08 10:20:46.496 -   chunk_35: chunk_35.bin
+2025-05-08 10:20:46.497 -   chunk_36: chunk_36.bin
+2025-05-08 10:20:46.497 -   chunk_37: chunk_37.bin
+2025-05-08 10:20:46.497 -   chunk_38: chunk_38.bin
+2025-05-08 10:20:46.497 -   chunk_39: chunk_39.bin
+2025-05-08 10:20:46.497 -   chunk_4: chunk_4.bin
+2025-05-08 10:20:46.498 -   chunk_40: chunk_40.bin
+2025-05-08 10:20:46.498 -   chunk_41: chunk_41.bin
+2025-05-08 10:20:46.498 -   chunk_42: chunk_42.bin
+2025-05-08 10:20:46.498 -   chunk_43: chunk_43.bin
+2025-05-08 10:20:46.498 -   chunk_44: chunk_44.bin
+2025-05-08 10:20:46.499 -   chunk_45: chunk_45.bin
+2025-05-08 10:20:46.499 -   chunk_46: chunk_46.bin
+2025-05-08 10:20:46.499 -   chunk_47: chunk_47.bin
+2025-05-08 10:20:46.499 -   chunk_48: chunk_48.bin
+2025-05-08 10:20:46.499 -   chunk_49: chunk_49.bin
+2025-05-08 10:20:46.500 -   chunk_5: chunk_5.bin
+2025-05-08 10:20:46.500 -   chunk_6: chunk_6.bin
+2025-05-08 10:20:46.500 -   chunk_7: chunk_7.bin
+2025-05-08 10:20:46.500 -   chunk_8: chunk_8.bin
+2025-05-08 10:20:46.501 -   chunk_9: chunk_9.bin
+2025-05-08 10:20:46.501 -   chunk_hashes: 
+2025-05-08 10:20:46.501 -   cid: 
+2025-05-08 10:20:46.501 -   original_filename: 
+2025-05-08 10:20:46.502 - Missing required form fields
+2025-05-08 10:25:33.040 - Database initialized (file_chunks, chunk_references, file_metadata).
+2025-05-08 10:25:33.040 - StorageService starting HTTP on port 8081
+2025-05-08 10:25:39.761 - POST /store received with multipart/form-data
+2025-05-08 10:25:39.761 - Received parameters:
+2025-05-08 10:25:39.761 - Received files:
+2025-05-08 10:25:39.762 -   chunk_0: chunk_0.bin
+2025-05-08 10:25:39.762 -   chunk_1: chunk_1.bin
+2025-05-08 10:25:39.762 -   chunk_10: chunk_10.bin
+2025-05-08 10:25:39.763 -   chunk_11: chunk_11.bin
+2025-05-08 10:25:39.763 -   chunk_12: chunk_12.bin
+2025-05-08 10:25:39.763 -   chunk_13: chunk_13.bin
+2025-05-08 10:25:39.763 -   chunk_14: chunk_14.bin
+2025-05-08 10:25:39.763 -   chunk_15: chunk_15.bin
+2025-05-08 10:25:39.764 -   chunk_16: chunk_16.bin
+2025-05-08 10:25:39.764 -   chunk_17: chunk_17.bin
+2025-05-08 10:25:39.765 -   chunk_18: chunk_18.bin
+2025-05-08 10:25:39.765 -   chunk_19: chunk_19.bin
+2025-05-08 10:25:39.765 -   chunk_2: chunk_2.bin
+2025-05-08 10:25:39.766 -   chunk_20: chunk_20.bin
+2025-05-08 10:25:39.766 -   chunk_21: chunk_21.bin
+2025-05-08 10:25:39.767 -   chunk_22: chunk_22.bin
+2025-05-08 10:25:39.767 -   chunk_23: chunk_23.bin
+2025-05-08 10:25:39.767 -   chunk_24: chunk_24.bin
+2025-05-08 10:25:39.768 -   chunk_25: chunk_25.bin
+2025-05-08 10:25:39.768 -   chunk_26: chunk_26.bin
+2025-05-08 10:25:39.768 -   chunk_27: chunk_27.bin
+2025-05-08 10:25:39.768 -   chunk_28: chunk_28.bin
+2025-05-08 10:25:39.769 -   chunk_29: chunk_29.bin
+2025-05-08 10:25:39.769 -   chunk_3: chunk_3.bin
+2025-05-08 10:25:39.769 -   chunk_30: chunk_30.bin
+2025-05-08 10:25:39.769 -   chunk_31: chunk_31.bin
+2025-05-08 10:25:39.770 -   chunk_32: chunk_32.bin
+2025-05-08 10:25:39.770 -   chunk_33: chunk_33.bin
+2025-05-08 10:25:39.770 -   chunk_34: chunk_34.bin
+2025-05-08 10:25:39.770 -   chunk_35: chunk_35.bin
+2025-05-08 10:25:39.771 -   chunk_36: chunk_36.bin
+2025-05-08 10:25:39.771 -   chunk_37: chunk_37.bin
+2025-05-08 10:25:39.771 -   chunk_38: chunk_38.bin
+2025-05-08 10:25:39.772 -   chunk_39: chunk_39.bin
+2025-05-08 10:25:39.772 -   chunk_4: chunk_4.bin
+2025-05-08 10:25:39.772 -   chunk_40: chunk_40.bin
+2025-05-08 10:25:39.773 -   chunk_41: chunk_41.bin
+2025-05-08 10:25:39.773 -   chunk_42: chunk_42.bin
+2025-05-08 10:25:39.773 -   chunk_43: chunk_43.bin
+2025-05-08 10:25:39.774 -   chunk_44: chunk_44.bin
+2025-05-08 10:25:39.774 -   chunk_45: chunk_45.bin
+2025-05-08 10:25:39.774 -   chunk_46: chunk_46.bin
+2025-05-08 10:25:39.775 -   chunk_47: chunk_47.bin
+2025-05-08 10:25:39.775 -   chunk_48: chunk_48.bin
+2025-05-08 10:25:39.775 -   chunk_49: chunk_49.bin
+2025-05-08 10:25:39.776 -   chunk_5: chunk_5.bin
+2025-05-08 10:25:39.776 -   chunk_6: chunk_6.bin
+2025-05-08 10:25:39.776 -   chunk_7: chunk_7.bin
+2025-05-08 10:25:39.776 -   chunk_8: chunk_8.bin
+2025-05-08 10:25:39.777 -   chunk_9: chunk_9.bin
+2025-05-08 10:25:39.777 -   chunk_hashes: 
+2025-05-08 10:25:39.777 -   cid: 
+2025-05-08 10:25:39.778 -   original_filename: 
+2025-05-08 10:25:39.778 - Missing required form fields
+2025-05-08 10:40:43.949 - POST /store received with multipart/form-data
+2025-05-08 10:40:43.949 - Received parameters:
+2025-05-08 10:40:43.949 - Received files:
+2025-05-08 10:40:43.949 -   chunk_0: chunk_0.bin
+2025-05-08 10:40:43.950 -   chunk_1: chunk_1.bin
+2025-05-08 10:40:43.950 -   chunk_10: chunk_10.bin
+2025-05-08 10:40:43.950 -   chunk_11: chunk_11.bin
+2025-05-08 10:40:43.951 -   chunk_12: chunk_12.bin
+2025-05-08 10:40:43.951 -   chunk_13: chunk_13.bin
+2025-05-08 10:40:43.951 -   chunk_14: chunk_14.bin
+2025-05-08 10:40:43.951 -   chunk_15: chunk_15.bin
+2025-05-08 10:40:43.952 -   chunk_16: chunk_16.bin
+2025-05-08 10:40:43.952 -   chunk_17: chunk_17.bin
+2025-05-08 10:40:43.952 -   chunk_18: chunk_18.bin
+2025-05-08 10:40:43.953 -   chunk_19: chunk_19.bin
+2025-05-08 10:40:43.953 -   chunk_2: chunk_2.bin
+2025-05-08 10:40:43.953 -   chunk_20: chunk_20.bin
+2025-05-08 10:40:43.954 -   chunk_21: chunk_21.bin
+2025-05-08 10:40:43.954 -   chunk_22: chunk_22.bin
+2025-05-08 10:40:43.954 -   chunk_23: chunk_23.bin
+2025-05-08 10:40:43.954 -   chunk_24: chunk_24.bin
+2025-05-08 10:40:43.955 -   chunk_25: chunk_25.bin
+2025-05-08 10:40:43.955 -   chunk_26: chunk_26.bin
+2025-05-08 10:40:43.955 -   chunk_27: chunk_27.bin
+2025-05-08 10:40:43.955 -   chunk_28: chunk_28.bin
+2025-05-08 10:40:43.956 -   chunk_29: chunk_29.bin
+2025-05-08 10:40:43.956 -   chunk_3: chunk_3.bin
+2025-05-08 10:40:43.956 -   chunk_30: chunk_30.bin
+2025-05-08 10:40:43.956 -   chunk_31: chunk_31.bin
+2025-05-08 10:40:43.957 -   chunk_32: chunk_32.bin
+2025-05-08 10:40:43.957 -   chunk_33: chunk_33.bin
+2025-05-08 10:40:43.957 -   chunk_34: chunk_34.bin
+2025-05-08 10:40:43.957 -   chunk_35: chunk_35.bin
+2025-05-08 10:40:43.958 -   chunk_36: chunk_36.bin
+2025-05-08 10:40:43.958 -   chunk_37: chunk_37.bin
+2025-05-08 10:40:43.958 -   chunk_38: chunk_38.bin
+2025-05-08 10:40:43.958 -   chunk_39: chunk_39.bin
+2025-05-08 10:40:43.959 -   chunk_4: chunk_4.bin
+2025-05-08 10:40:43.959 -   chunk_40: chunk_40.bin
+2025-05-08 10:40:43.959 -   chunk_41: chunk_41.bin
+2025-05-08 10:40:43.959 -   chunk_42: chunk_42.bin
+2025-05-08 10:40:43.960 -   chunk_43: chunk_43.bin
+2025-05-08 10:40:43.960 -   chunk_44: chunk_44.bin
+2025-05-08 10:40:43.960 -   chunk_45: chunk_45.bin
+2025-05-08 10:40:43.961 -   chunk_46: chunk_46.bin
+2025-05-08 10:40:43.961 -   chunk_47: chunk_47.bin
+2025-05-08 10:40:43.961 -   chunk_48: chunk_48.bin
+2025-05-08 10:40:43.962 -   chunk_49: chunk_49.bin
+2025-05-08 10:40:43.962 -   chunk_5: chunk_5.bin
+2025-05-08 10:40:43.962 -   chunk_6: chunk_6.bin
+2025-05-08 10:40:43.962 -   chunk_7: chunk_7.bin
+2025-05-08 10:40:43.963 -   chunk_8: chunk_8.bin
+2025-05-08 10:40:43.963 -   chunk_9: chunk_9.bin
+2025-05-08 10:40:43.963 -   chunk_hashes: 
+2025-05-08 10:40:43.963 -   cid: 
+2025-05-08 10:40:43.964 -   original_filename: 
+2025-05-08 10:40:43.964 - Missing required form fields
+2025-05-08 10:47:36.730 - Database initialized (file_chunks, chunk_references, file_metadata).
+2025-05-08 10:47:36.732 - StorageService starting HTTP on port 8081
+2025-05-08 10:47:45.610 - POST /store received with multipart/form-data
+2025-05-08 10:47:45.610 - Received parameters:
+2025-05-08 10:47:45.610 - Received files:
+2025-05-08 10:47:45.610 -   chunk_0: chunk_0.bin (content_length: 1048576)
+2025-05-08 10:47:45.611 -   chunk_1: chunk_1.bin (content_length: 1048576)
+2025-05-08 10:47:45.611 -   chunk_hashes:  (content_length: 135)
+2025-05-08 10:47:45.611 -   cid:  (content_length: 81)
+2025-05-08 10:47:45.611 -   original_filename:  (content_length: 12)
+2025-05-08 10:47:45.611 - Found cid in files: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_adc43b04fdc2fc3e
+2025-05-08 10:47:45.611 - Found original_filename in files: file_2mb.txt
+2025-05-08 10:47:45.612 - Found chunk_hashes in files: ["4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56","4e29ad18ab9f42d7c233500771a39d7c852b200baf328fd00fbbe3fecea1eb56"]
+2025-05-08 10:47:45.612 - Storing CID=9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_adc43b04fdc2fc3e with 2 chunks
+2025-05-08 10:47:45.616 - Updated reference counts for 2 chunks for CID: 9d2a08a033d22e99e4b92d0881e17d40a9e1f36a9883026bcbcb93701de86bd3_adc43b04fdc2fc3e
+2025-05-08 10:48:00.141 - POST /store received with multipart/form-data
+2025-05-08 10:48:00.141 - Received parameters:
+2025-05-08 10:48:00.141 - Received files:
+2025-05-08 10:48:00.141 -   chunk_0: chunk_0.bin (content_length: 1048576)
+2025-05-08 10:48:00.142 -   chunk_1: chunk_1.bin (content_length: 1048576)
+2025-05-08 10:48:00.142 -   chunk_10: chunk_10.bin (content_length: 1048576)
+2025-05-08 10:48:00.142 -   chunk_11: chunk_11.bin (content_length: 1048576)
+2025-05-08 10:48:00.143 -   chunk_12: chunk_12.bin (content_length: 1048576)
+2025-05-08 10:48:00.143 -   chunk_13: chunk_13.bin (content_length: 1048576)
+2025-05-08 10:48:00.143 -   chunk_14: chunk_14.bin (content_length: 1048576)
+2025-05-08 10:48:00.143 -   chunk_15: chunk_15.bin (content_length: 1048576)
+2025-05-08 10:48:00.144 -   chunk_16: chunk_16.bin (content_length: 1048576)
+2025-05-08 10:48:00.144 -   chunk_17: chunk_17.bin (content_length: 1048576)
+2025-05-08 10:48:00.144 -   chunk_18: chunk_18.bin (content_length: 1048576)
+2025-05-08 10:48:00.145 -   chunk_19: chunk_19.bin (content_length: 1048576)
+2025-05-08 10:48:00.145 -   chunk_2: chunk_2.bin (content_length: 1048576)
+2025-05-08 10:48:00.145 -   chunk_20: chunk_20.bin (content_length: 1048576)
+2025-05-08 10:48:00.145 -   chunk_21: chunk_21.bin (content_length: 1048576)
+2025-05-08 10:48:00.145 -   chunk_22: chunk_22.bin (content_length: 1048576)
+2025-05-08 10:48:00.146 -   chunk_23: chunk_23.bin (content_length: 1048576)
+2025-05-08 10:48:00.146 -   chunk_24: chunk_24.bin (content_length: 1048576)
+2025-05-08 10:48:00.146 -   chunk_25: chunk_25.bin (content_length: 1048576)
+2025-05-08 10:48:00.146 -   chunk_26: chunk_26.bin (content_length: 1048576)
+2025-05-08 10:48:00.147 -   chunk_27: chunk_27.bin (content_length: 1048576)
+2025-05-08 10:48:00.147 -   chunk_28: chunk_28.bin (content_length: 1048576)
+2025-05-08 10:48:00.147 -   chunk_29: chunk_29.bin (content_length: 1048576)
+2025-05-08 10:48:00.147 -   chunk_3: chunk_3.bin (content_length: 1048576)
+2025-05-08 10:48:00.147 -   chunk_30: chunk_30.bin (content_length: 1048576)
+2025-05-08 10:48:00.148 -   chunk_31: chunk_31.bin (content_length: 1048576)
+2025-05-08 10:48:00.148 -   chunk_32: chunk_32.bin (content_length: 1048576)
+2025-05-08 10:48:00.148 -   chunk_33: chunk_33.bin (content_length: 1048576)
+2025-05-08 10:48:00.148 -   chunk_34: chunk_34.bin (content_length: 1048576)
+2025-05-08 10:48:00.148 -   chunk_35: chunk_35.bin (content_length: 1048576)
+2025-05-08 10:48:00.149 -   chunk_36: chunk_36.bin (content_length: 1048576)
+2025-05-08 10:48:00.149 -   chunk_37: chunk_37.bin (content_length: 1048576)
+2025-05-08 10:48:00.149 -   chunk_38: chunk_38.bin (content_length: 1048576)
+2025-05-08 10:48:00.149 -   chunk_39: chunk_39.bin (content_length: 1048576)
+2025-05-08 10:48:00.150 -   chunk_4: chunk_4.bin (content_length: 1048576)
+2025-05-08 10:48:00.150 -   chunk_40: chunk_40.bin (content_length: 1048576)
+2025-05-08 10:48:00.150 -   chunk_41: chunk_41.bin (content_length: 1048576)
+2025-05-08 10:48:00.150 -   chunk_42: chunk_42.bin (content_length: 1048576)
+2025-05-08 10:48:00.151 -   chunk_43: chunk_43.bin (content_length: 1048576)
+2025-05-08 10:48:00.151 -   chunk_44: chunk_44.bin (content_length: 1048576)
+2025-05-08 10:48:00.151 -   chunk_45: chunk_45.bin (content_length: 1048576)
+2025-05-08 10:48:00.151 -   chunk_46: chunk_46.bin (content_length: 1048576)
+2025-05-08 10:48:00.152 -   chunk_47: chunk_47.bin (content_length: 1048576)
+2025-05-08 10:48:00.152 -   chunk_48: chunk_48.bin (content_length: 1048576)
+2025-05-08 10:48:00.152 -   chunk_49: chunk_49.bin (content_length: 305549)
+2025-05-08 10:48:00.152 -   chunk_5: chunk_5.bin (content_length: 1048576)
+2025-05-08 10:48:00.152 -   chunk_6: chunk_6.bin (content_length: 1048576)
+2025-05-08 10:48:00.152 -   chunk_7: chunk_7.bin (content_length: 1048576)
+2025-05-08 10:48:00.152 -   chunk_8: chunk_8.bin (content_length: 1048576)
+2025-05-08 10:48:00.153 -   chunk_9: chunk_9.bin (content_length: 1048576)
+2025-05-08 10:48:00.153 -   chunk_hashes:  (content_length: 3351)
+2025-05-08 10:48:00.153 -   cid:  (content_length: 81)
+2025-05-08 10:48:00.153 -   original_filename:  (content_length: 8)
+2025-05-08 10:48:00.153 - Found cid in files: d9890958fee79a61c58ec629ec93f437bda0b4dfee773f422f001c7099d9ea99_a377a74611f54060
+2025-05-08 10:48:00.153 - Found original_filename in files: 50mb.txt
+2025-05-08 10:48:00.154 - Found chunk_hashes in files: ["d95dfb001492ad2f51ddbd2e0872c9e27b2fcccc874cc0f6c3e2c92499cfc660","fe81fe4b97e7266fc01ed336fb34a51f23212e85f4fa1d5831591ae23af0e522","9f84dee9e6867901f7b4a4072b366595bdab9beeb2adc563bc07d2277851ae2d","4f94d00b7e06bf80728042ef98e3c4becbeaaf81350938db3484a49e485d7714","7d9473126fbc04d8254a69b8a33cbc66a910787e3f46e06965e1b064d4a93321","8808f5161a66faab658c60338b5f59c27a098d86e7e3c9aca3653a8f4e9b92f2","7c53f921f69a0cf70c749c5d01c637b85fbf5ad3ec7f68ab930cf83886fd523f","c877edb560ce6444abc22c26b7df75049f347df8db621ebb000f50767c2d73aa","06f0eff920d37769bfb65ef8ee258bb33507bf07db758a844907ec146102c382","5638db031c97da499cdd0780ff0c53c4c97f3711c15093a65372fdec9b0dcfba","d48dadb5ac7a2467bc4af71683323c96e7ecd3588c7262eff9a9467d034c4c5b","3ac4ae6ab0472bacb84bc8ec8284f78cfd8acca7a89785f669affa7d36182e15","10248d4b77ff80157f3af050b4b2f35eeb0bc53aeee056390316fa9ad3fb4cbc","c4df6bbf6276d327528fc03ffd38a905e19acd73f8773a90a97bbe5820319432","7c50d86d25fa66c9868328251bd680fde2228bed79aece4ee66da479040bda1f","064e27b41c8b55484ad3ce251088def7856d1381edb227b1a85b3c981902439b","30f1403177648f8424226052599d4a839198fe596ac419435bf16a03f5783775","c0100a3b18d339b3f17fe98d6b74f3bbb6d7ca66dba6ff0b874b8e4c3d4cb5ad","b2da328e3a491736692fb38a1814462f9a95e95ebdfbbdbdf5ca9b386896ad09","7fb3c8cdb835b5f7e75a662197dd01a18adb27d997629f43add433bd073b2a23","19fee599e188b064e6f7d3b7fa64ef2a484a8899fc6bb4d5da5cda510ac58ea2","c755082e7d34446d317bca31a9f966b31f3efd0b0b53d6051c9544352508a72d","1b4d272d17ca0b02170e3075cacf39ffa44ddd429452230276d4ad07770b53d1","78f658b735f5ca7519e779b524f83b1bea31dbf5c7806097be28d5674de9f9b1","27c52a43138070aeb56fd49ba3d6753d7e11d2d2489996092cc6ac2582e79de6","d95dfb001492ad2f51ddbd2e0872c9e27b2fcccc874cc0f6c3e2c92499cfc660","fe81fe4b97e7266fc01ed336fb34a51f23212e85f4fa1d5831591ae23af0e522","9f84dee9e6867901f7b4a4072b366595bdab9beeb2adc563bc07d2277851ae2d","4f94d00b7e06bf80728042ef98e3c4becbeaaf81350938db3484a49e485d7714","7d9473126fbc04d8254a69b8a33cbc66a910787e3f46e06965e1b064d4a93321","8808f5161a66faab658c60338b5f59c27a098d86e7e3c9aca3653a8f4e9b92f2","7c53f921f69a0cf70c749c5d01c637b85fbf5ad3ec7f68ab930cf83886fd523f","c877edb560ce6444abc22c26b7df75049f347df8db621ebb000f50767c2d73aa","06f0eff920d37769bfb65ef8ee258bb33507bf07db758a844907ec146102c382","5638db031c97da499cdd0780ff0c53c4c97f3711c15093a65372fdec9b0dcfba","d48dadb5ac7a2467bc4af71683323c96e7ecd3588c7262eff9a9467d034c4c5b","3ac4ae6ab0472bacb84bc8ec8284f78cfd8acca7a89785f669affa7d36182e15","10248d4b77ff80157f3af050b4b2f35eeb0bc53aeee056390316fa9ad3fb4cbc","c4df6bbf6276d327528fc03ffd38a905e19acd73f8773a90a97bbe5820319432","7c50d86d25fa66c9868328251bd680fde2228bed79aece4ee66da479040bda1f","064e27b41c8b55484ad3ce251088def7856d1381edb227b1a85b3c981902439b","30f1403177648f8424226052599d4a839198fe596ac419435bf16a03f5783775","c0100a3b18d339b3f17fe98d6b74f3bbb6d7ca66dba6ff0b874b8e4c3d4cb5ad","b2da328e3a491736692fb38a1814462f9a95e95ebdfbbdbdf5ca9b386896ad09","7fb3c8cdb835b5f7e75a662197dd01a18adb27d997629f43add433bd073b2a23","19fee599e188b064e6f7d3b7fa64ef2a484a8899fc6bb4d5da5cda510ac58ea2","c755082e7d34446d317bca31a9f966b31f3efd0b0b53d6051c9544352508a72d","1b4d272d17ca0b02170e3075cacf39ffa44ddd429452230276d4ad07770b53d1","78f658b735f5ca7519e779b524f83b1bea31dbf5c7806097be28d5674de9f9b1","3ded1989398f8213164b784dfb11465f617df0a5da7895fcf37a96e1e5bca69b"]
+2025-05-08 10:48:00.154 - Storing CID=d9890958fee79a61c58ec629ec93f437bda0b4dfee773f422f001c7099d9ea99_a377a74611f54060 with 50 chunks
+2025-05-08 10:48:00.247 - Updated reference counts for 50 chunks for CID: d9890958fee79a61c58ec629ec93f437bda0b4dfee773f422f001c7099d9ea99_a377a74611f54060

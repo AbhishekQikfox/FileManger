@@ -37,22 +37,16 @@ std::mutex                serverMutex;
 std::condition_variable   serverCV;
 httplib::Server*          serverPtr = nullptr;
 
-
-
 void WriteLog(const std::string& msg) {
     std::ofstream log(DB_DIR + "\\backend.log", std::ios::app);
     if (log.is_open()) {
-        // Get current time with millisecond precision
         auto now = std::chrono::system_clock::now();
         auto now_time_t = std::chrono::system_clock::to_time_t(now);
         auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
                           now.time_since_epoch()) % 1000;
-
-        // Format time string
         std::ostringstream oss;
         oss << std::put_time(std::localtime(&now_time_t), "%Y-%m-%d %H:%M:%S")
             << '.' << std::setfill('0') << std::setw(3) << now_ms.count();
-
         log << oss.str() << " - " << msg << std::endl;
     }
 }
@@ -62,11 +56,9 @@ std::vector<char> base64_decode(const std::string& input) {
     BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
     BIO* bmem = BIO_new_mem_buf(input.data(), static_cast<int>(input.size()));
     bmem = BIO_push(b64, bmem);
-
     std::vector<char> buffer(input.size());
     int decodedLen = BIO_read(bmem, buffer.data(), static_cast<int>(buffer.size()));
     BIO_free_all(bmem);
-
     if (decodedLen > 0) {
         buffer.resize(decodedLen);
         return buffer;
@@ -160,6 +152,7 @@ std::string GetOriginalFilename(const std::string& cid, sqlite3* db) {
     }
     return filename;
 }
+
 std::vector<std::pair<int, std::string>> GetChunkHashesByCID(const std::string& cid) {
     std::vector<std::pair<int, std::string>> result;
     sqlite3* db = nullptr;
@@ -214,45 +207,79 @@ std::vector<char> ReadFileToVector(const std::string& filePath) {
     return buffer;
 }
 
-
 void RunHTTPServer() {
     fs::create_directories(CHUNK_DIR);
     InitializeDatabase();
     WriteLog("StorageService starting HTTP on port " + std::to_string(HTTP_PORT));
 
     httplib::Server server;
+    server.set_payload_max_length(100 * 1024 * 1024); // Set to 100MB to handle large file uploads
+    server.set_read_timeout(60, 0); // Set read timeout to 60 seconds
 
     server.Post("/store", [](const httplib::Request& req, httplib::Response& res) {
-        WriteLog("POST /store received, Content-Length=" + std::to_string(req.body.size()));
-        if (req.get_header_value("Content-Type") != "application/json") {
+        WriteLog("POST /store received with multipart/form-data");
+        
+        // Log all received parameters
+        WriteLog("Received parameters:");
+        for (const auto& param : req.params) {
+            WriteLog("  " + param.first + ": " + param.second);
+        }
+
+        // Log all received files
+        WriteLog("Received files:");
+        for (const auto& file : req.files) {
+            WriteLog("  " + file.first + ": " + file.second.filename + " (content_length: " + std::to_string(file.second.content.size()) + ")");
+        }
+
+        // Extract required fields from params or files
+        std::string cid, original_filename, chunk_hashes_json;
+        
+        if (req.has_param("cid")) {
+            cid = req.get_param_value("cid");
+            WriteLog("Found cid in params: " + cid);
+        } else if (req.files.find("cid") != req.files.end()) {
+            cid = req.files.find("cid")->second.content;
+            WriteLog("Found cid in files: " + cid);
+        }
+
+        if (req.has_param("original_filename")) {
+            original_filename = req.get_param_value("original_filename");
+            WriteLog("Found original_filename in params: " + original_filename);
+        } else if (req.files.find("original_filename") != req.files.end()) {
+            original_filename = req.files.find("original_filename")->second.content;
+            WriteLog("Found original_filename in files: " + original_filename);
+        }
+
+        if (req.has_param("chunk_hashes")) {
+            chunk_hashes_json = req.get_param_value("chunk_hashes");
+            WriteLog("Found chunk_hashes in params: " + chunk_hashes_json);
+        } else if (req.files.find("chunk_hashes") != req.files.end()) {
+            chunk_hashes_json = req.files.find("chunk_hashes")->second.content;
+            WriteLog("Found chunk_hashes in files: " + chunk_hashes_json);
+        }
+
+        // Validate required fields
+        if (cid.empty() || original_filename.empty() || chunk_hashes_json.empty()) {
             res.status = 400;
-            res.set_content("Expected application/json", "text/plain");
+            res.set_content("Missing required form fields", "text/plain");
+            WriteLog("Missing required form fields");
             return;
         }
-    
+
         try {
-            json payload   = json::parse(req.body);
-            std::string cid= payload.at("cid").get<std::string>();
-            auto hashes    = payload.at("chunks").get<std::vector<std::string>>();
-            auto chunksB64 = payload.at("data").get<std::vector<std::string>>();
-            std::string original_filename = payload.at("original_filename").get<std::string>();
-    
-            if (hashes.size() != chunksB64.size()) {
-                res.status = 400;
-                res.set_content("chunks/data size mismatch", "text/plain");
-                return;
-            }
-    
+            json chunk_hashes_json_parsed = json::parse(chunk_hashes_json);
+            std::vector<std::string> hashes = chunk_hashes_json_parsed.get<std::vector<std::string>>();
+
             WriteLog("Storing CID=" + cid + " with " + std::to_string(hashes.size()) + " chunks");
-    
+
             sqlite3* db = nullptr;
             if (sqlite3_open(DB_PATH.c_str(), &db) != SQLITE_OK) {
                 res.status = 500;
                 res.set_content("Database error", "text/plain");
+                WriteLog("Failed to open database");
                 return;
             }
-    
-            // Begin transaction for the entire upload
+
             if (sqlite3_exec(db, "BEGIN;", nullptr, nullptr, nullptr) != SQLITE_OK) {
                 WriteLog("Failed to begin transaction");
                 sqlite3_close(db);
@@ -260,30 +287,28 @@ void RunHTTPServer() {
                 res.set_content("Transaction error", "text/plain");
                 return;
             }
-    
+
             for (size_t i = 0; i < hashes.size(); ++i) {
                 std::string hash = hashes[i];
-                std::string encoded_data = chunksB64[i];
-                auto raw_data = base64_decode(encoded_data);
+                std::string chunk_name = "chunk_" + std::to_string(i);
                 
-                if (raw_data.empty()) {
-                    WriteLog("Decode failed for chunk " + std::to_string(i));
+                auto file_it = req.files.find(chunk_name);
+                if (file_it == req.files.end()) {
+                    WriteLog("Missing chunk data for " + chunk_name);
                     sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
                     sqlite3_close(db);
                     res.status = 400;
-                    res.set_content("Invalid chunk data", "text/plain");
+                    res.set_content("Missing chunk data", "text/plain");
                     return;
                 }
                 
-                // Removed SHA-256 hash computation and validation
-                // Trust the hash provided by the frontend
-    
-                // Update reference count similar to batchUpdateRefCounts
+                std::string raw_data = file_it->second.content;
+
                 const char* sql_select = "SELECT ref_count FROM chunk_references WHERE hash = ?;";
                 sqlite3_stmt* stmt_select;
                 int ref_count = 0;
                 bool hash_exists = false;
-    
+
                 if (sqlite3_prepare_v2(db, sql_select, -1, &stmt_select, nullptr) == SQLITE_OK) {
                     sqlite3_bind_text(stmt_select, 1, hash.c_str(), -1, SQLITE_STATIC);
                     if (sqlite3_step(stmt_select) == SQLITE_ROW) {
@@ -294,9 +319,8 @@ void RunHTTPServer() {
                 } else {
                     WriteLog("Failed to prepare SELECT for hash: " + hash);
                 }
-    
+
                 if (hash_exists) {
-                    // Increment existing ref_count
                     const char* sql_update = "UPDATE chunk_references SET ref_count = ? WHERE hash = ?;";
                     sqlite3_stmt* stmt_update;
                     if (sqlite3_prepare_v2(db, sql_update, -1, &stmt_update, nullptr) == SQLITE_OK) {
@@ -310,7 +334,6 @@ void RunHTTPServer() {
                         WriteLog("Failed to prepare UPDATE for hash: " + hash);
                     }
                 } else {
-                    // Insert new hash with ref_count = 1 and save chunk data
                     const char* sql_insert = "INSERT INTO chunk_references (hash, ref_count) VALUES (?, 1);";
                     sqlite3_stmt* stmt_insert;
                     if (sqlite3_prepare_v2(db, sql_insert, -1, &stmt_insert, nullptr) == SQLITE_OK) {
@@ -335,8 +358,7 @@ void RunHTTPServer() {
                         WriteLog("Failed to prepare INSERT for hash: " + hash);
                     }
                 }
-    
-                // Insert into file_chunks
+
                 const char* sql_file_chunks = "INSERT INTO file_chunks (cid, chunk_index, hash) VALUES (?, ?, ?);";
                 sqlite3_stmt* stmt_file_chunks;
                 if (sqlite3_prepare_v2(db, sql_file_chunks, -1, &stmt_file_chunks, nullptr) == SQLITE_OK) {
@@ -351,8 +373,7 @@ void RunHTTPServer() {
                     WriteLog("Failed to prepare file_chunks INSERT for CID: " + cid);
                 }
             }
-    
-            // Insert into file_metadata
+
             const char* sql_metadata = "INSERT INTO file_metadata (cid, original_filename) VALUES (?, ?);";
             sqlite3_stmt* stmt_metadata;
             if (sqlite3_prepare_v2(db, sql_metadata, -1, &stmt_metadata, nullptr) == SQLITE_OK) {
@@ -365,7 +386,7 @@ void RunHTTPServer() {
             } else {
                 WriteLog("Failed to prepare file_metadata INSERT");
             }
-    
+
             if (sqlite3_exec(db, "COMMIT;", nullptr, nullptr, nullptr) != SQLITE_OK) {
                 WriteLog("Failed to commit transaction for CID: " + cid);
                 sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
@@ -374,13 +395,12 @@ void RunHTTPServer() {
                 res.set_content("Transaction commit failed", "text/plain");
                 return;
             }
-    
+
             sqlite3_close(db);
             WriteLog("Updated reference counts for " + std::to_string(hashes.size()) + " chunks for CID: " + cid);
             res.status = 200;
             res.set_content("Success", "text/plain");
-        }
-        catch (std::exception& ex) {
+        } catch (std::exception& ex) {
             WriteLog(std::string("Exception in /store: ") + ex.what());
             res.status = 500;
             res.set_content("Server error", "text/plain");
@@ -397,7 +417,6 @@ void RunHTTPServer() {
             return;
         }
 
-        // Retrieve chunk hashes
         std::vector<std::string> chunk_hashes;
         const char* sql_select = "SELECT hash FROM file_chunks WHERE cid = ? ORDER BY chunk_index;";
         sqlite3_stmt* stmt_select;
@@ -417,7 +436,6 @@ void RunHTTPServer() {
             return;
         }
 
-        // Reconstruct file data
         std::string file_data;
         for (const auto& hash : chunk_hashes) {
             std::string chunk_path = CHUNK_DIR + "/" + hash + ".bin";
@@ -432,7 +450,6 @@ void RunHTTPServer() {
             ifs.close();
         }
 
-        // Get filename for Content-Disposition
         std::string filename = GetOriginalFilename(cid, db);
         if (filename.empty()) filename = "download.bin";
 
@@ -466,7 +483,6 @@ void RunHTTPServer() {
 
             sqlite3_exec(db, "BEGIN;", nullptr, nullptr, nullptr);
 
-            // Get old chunk hashes
             std::vector<std::string> old_chunks;
             const char* sql_select_old = "SELECT hash FROM file_chunks WHERE cid = ? ORDER BY chunk_index;";
             sqlite3_stmt* stmt_select_old;
@@ -487,7 +503,6 @@ void RunHTTPServer() {
                 return;
             }
 
-            // Check if identical
             if (old_chunks == new_hashes) {
                 sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
                 sqlite3_close(db);
@@ -496,7 +511,6 @@ void RunHTTPServer() {
                 return;
             }
 
-            // Decrement old chunks ref_counts
             for (const auto& hash : old_chunks) {
                 const char* sql_decrement = "UPDATE chunk_references SET ref_count = ref_count - 1 WHERE hash = ?;";
                 sqlite3_stmt* stmt_decrement;
@@ -507,7 +521,6 @@ void RunHTTPServer() {
                 }
             }
 
-            // Handle new chunks: increment ref_counts and save if new
             for (size_t i = 0; i < new_hashes.size(); ++i) {
                 std::string hash = new_hashes[i];
                 std::string data_b64 = new_data_b64[i];
@@ -549,7 +562,6 @@ void RunHTTPServer() {
                 }
             }
 
-            // Insert new file_chunks
             for (size_t i = 0; i < new_hashes.size(); ++i) {
                 const char* sql_insert_chunk = "INSERT INTO file_chunks (cid, chunk_index, hash) VALUES (?, ?, ?);";
                 sqlite3_stmt* stmt_insert_chunk;
@@ -562,7 +574,6 @@ void RunHTTPServer() {
                 }
             }
 
-            // Insert new metadata with new filename
             const char* sql_insert_meta = "INSERT INTO file_metadata (cid, original_filename) VALUES (?, ?);";
             sqlite3_stmt* stmt_insert_meta;
             if (sqlite3_prepare_v2(db, sql_insert_meta, -1, &stmt_insert_meta, nullptr) == SQLITE_OK) {
@@ -572,7 +583,6 @@ void RunHTTPServer() {
                 sqlite3_finalize(stmt_insert_meta);
             }
 
-            // Delete old file_chunks and metadata
             const char* sql_delete_chunks = "DELETE FROM file_chunks WHERE cid = ?;";
             sqlite3_stmt* stmt_delete_chunks;
             if (sqlite3_prepare_v2(db, sql_delete_chunks, -1, &stmt_delete_chunks, nullptr) == SQLITE_OK) {
@@ -601,7 +611,6 @@ void RunHTTPServer() {
         }
     });
     
-    // Delete Endpoint
     server.Delete("/file/:cid", [](const httplib::Request& req, httplib::Response& res) {
         std::string cid = req.path_params.at("cid");
         sqlite3* db = nullptr;
@@ -689,8 +698,6 @@ void RunHTTPServer() {
         res.set_content("Deleted", "text/plain");
     });
 
-
-    // Service control and server running logic (unchanged)
     serverPtr = &server;
     {
         std::lock_guard<std::mutex> lock(serverMutex);
