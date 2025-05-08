@@ -195,3 +195,5 @@
 2025-05-08 11:59:30.816 - Retrieving file with CID: 93abb34e0efa37b8f502b8686aa8fbc7771d99edadd957341c87b155977d54d6_d7916681a47cd185
  from backend
 2025-05-08 11:59:30.818 - Backend service returned error: 404 - File not found
+2025-05-08 12:12:57.815 - Frontend service starting with config: {"backend_host":"127.0.0.1","backend_port":8081,"chunk_size":1048576,"log_file":"C:\\Users\\Training\\Desktop\\ProjectRoot\\FrontendService\\frontend.log","server_port":8080}
+2025-05-08 12:12:57.818 - Server started on port 8080

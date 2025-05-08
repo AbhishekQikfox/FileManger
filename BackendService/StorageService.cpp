@@ -424,9 +424,12 @@ void RunHTTPServer() {
     });
 
     server.Get("/file/:cid", [](const httplib::Request& req, httplib::Response& res) {
-        std::string cid = req.path_params.at("cid");
+        std::string cid = trim(req.path_params.at("cid"));
+        WriteLog("Received GET request for CID: " + cid + ", hex: " + stringToHex(cid));
+        
         sqlite3* db = nullptr;
         if (sqlite3_open(DB_PATH.c_str(), &db) != SQLITE_OK) {
+            WriteLog("Failed to open database for GET CID: " + cid);
             res.status = 500;
             res.set_content("Database error", "text/plain");
             sqlite3_close(db);
@@ -436,16 +439,25 @@ void RunHTTPServer() {
         std::vector<std::string> chunk_hashes;
         const char* sql_select = "SELECT hash FROM file_chunks WHERE cid = ? ORDER BY chunk_index;";
         sqlite3_stmt* stmt_select;
-        if (sqlite3_prepare_v2(db, sql_select, -1, &stmt_select, nullptr) == SQLITE_OK) {
-            sqlite3_bind_text(stmt_select, 1, cid.c_str(), -1, SQLITE_STATIC);
-            while (sqlite3_step(stmt_select) == SQLITE_ROW) {
-                const char* hash = reinterpret_cast<const char*>(sqlite3_column_text(stmt_select, 0));
-                chunk_hashes.push_back(hash);
-            }
-            sqlite3_finalize(stmt_select);
+        if (sqlite3_prepare_v2(db, sql_select, -1, &stmt_select, nullptr) != SQLITE_OK) {
+            WriteLog("Failed to prepare SELECT file_chunks for CID: " + cid + ", error: " + sqlite3_errmsg(db));
+            sqlite3_close(db);
+            res.status = 500;
+            res.set_content("Database query preparation failed", "text/plain");
+            return;
         }
 
+        sqlite3_bind_text(stmt_select, 1, cid.c_str(), -1, SQLITE_STATIC);
+        while (sqlite3_step(stmt_select) == SQLITE_ROW) {
+            const char* hash = reinterpret_cast<const char*>(sqlite3_column_text(stmt_select, 0));
+            chunk_hashes.push_back(hash ? hash : "");
+        }
+        sqlite3_finalize(stmt_select);
+
+        WriteLog("Found " + std::to_string(chunk_hashes.size()) + " chunks for CID: " + cid);
+
         if (chunk_hashes.empty()) {
+            WriteLog("No chunks found for CID: " + cid);
             sqlite3_close(db);
             res.status = 404;
             res.set_content("File not found", "text/plain");
@@ -457,6 +469,7 @@ void RunHTTPServer() {
             std::string chunk_path = CHUNK_DIR + "/" + hash + ".bin";
             std::ifstream ifs(chunk_path, std::ios::binary);
             if (!ifs) {
+                WriteLog("Failed to read chunk: " + chunk_path);
                 sqlite3_close(db);
                 res.status = 500;
                 res.set_content("Failed to read chunk: " + hash, "text/plain");
@@ -467,9 +480,15 @@ void RunHTTPServer() {
         }
 
         std::string filename = GetOriginalFilename(cid, db);
-        if (filename.empty()) filename = "download.bin";
+        if (filename.empty()) {
+            WriteLog("No filename found for CID: " + cid + ", using default: download.bin");
+            filename = "download.bin";
+        } else {
+            WriteLog("Found filename for CID: " + cid + ": " + filename);
+        }
 
         sqlite3_close(db);
+        WriteLog("Successfully retrieved file for CID: " + cid + " (" + std::to_string(file_data.size()) + " bytes)");
         res.status = 200;
         res.set_header("Content-Disposition", "attachment; filename=\"" + filename + "\"");
         res.set_content(file_data, "application/octet-stream");
