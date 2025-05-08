@@ -66,6 +66,21 @@ json loadConfig(const std::string& configPath) {
     return config;
 }
 
+std::string stringToHex(const std::string& input) {
+    std::ostringstream hex;
+    for (unsigned char c : input) {
+        hex << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(c);
+    }
+    return hex.str();
+}
+
+std::string trim(const std::string& str) {
+    size_t first = str.find_first_not_of(" \t\n\r");
+    size_t last = str.find_last_not_of(" \t\n\r");
+    if (first == std::string::npos) return "";
+    return str.substr(first, (last - first + 1));
+}
+
 std::string base64Encode(const std::vector<char>& data) {
     BIO* bio, *b64;
     BUF_MEM* bufferPtr;
@@ -383,15 +398,27 @@ void RunServer() {
     });
 
     server.Delete("/files/:cid", [](const httplib::Request& req, httplib::Response& res) {
-        std::string cid = req.path_params.at("cid");
+        std::string cid = trim(req.path_params.at("cid"));
+        WriteLog("Received DELETE request for CID: " + cid + ", hex: " + stringToHex(cid));
         httplib::Client client(BACKEND_HOST, BACKEND_PORT);
+        client.set_connection_timeout(10);
+        client.set_read_timeout(60);
+        WriteLog("Sending DELETE request to backend for CID: " + cid);
         auto backend_res = client.Delete("/file/" + cid);
         if (backend_res && backend_res->status == 200) {
+            WriteLog("Successfully deleted CID: " + cid + ", backend response: " + backend_res->body);
             res.status = 200;
             res.set_content("Deleted", "text/plain");
         } else {
+            std::string error_msg = "Failed to delete CID: " + cid;
+            if (backend_res) {
+                error_msg += ", status: " + std::to_string(backend_res->status) + ", response: " + backend_res->body;
+            } else {
+                error_msg += ", no response from backend";
+            }
+            WriteLog(error_msg);
             res.status = backend_res ? backend_res->status : 500;
-            res.set_content("Delete failed", "text/plain");
+            res.set_content("Delete failed: " + (backend_res ? backend_res->body : "No response"), "text/plain");
         }
     });
 

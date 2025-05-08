@@ -18,6 +18,7 @@
 #include <openssl/evp.h>
 #include <openssl/buffer.h>
 #include <openssl/sha.h>
+#include <iomanip>
 
 #include "httplib.h"
 
@@ -49,6 +50,21 @@ void WriteLog(const std::string& msg) {
             << '.' << std::setfill('0') << std::setw(3) << now_ms.count();
         log << oss.str() << " - " << msg << std::endl;
     }
+}
+
+std::string stringToHex(const std::string& input) {
+    std::ostringstream hex;
+    for (unsigned char c : input) {
+        hex << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(c);
+    }
+    return hex.str();
+}
+
+std::string trim(const std::string& str) {
+    size_t first = str.find_first_not_of(" \t\n\r");
+    size_t last = str.find_last_not_of(" \t\n\r");
+    if (first == std::string::npos) return "";
+    return str.substr(first, (last - first + 1));
 }
 
 std::vector<char> base64_decode(const std::string& input) {
@@ -610,90 +626,248 @@ void RunHTTPServer() {
             res.set_content("Server error", "text/plain");
         }
     });
-    
-    server.Delete("/file/:cid", [](const httplib::Request& req, httplib::Response& res) {
-        std::string cid = req.path_params.at("cid");
+
+    server.Get("/debug/cid/:cid", [](const httplib::Request& req, httplib::Response& res) {
+        std::string cid = trim(req.path_params.at("cid"));
+        WriteLog("Received DEBUG request for CID: " + cid + ", hex: " + stringToHex(cid));
+
         sqlite3* db = nullptr;
         if (sqlite3_open(DB_PATH.c_str(), &db) != SQLITE_OK) {
+            WriteLog("Failed to open database for DEBUG CID: " + cid);
             res.status = 500;
             res.set_content("Database error", "text/plain");
             return;
         }
 
-        sqlite3_exec(db, "BEGIN;", nullptr, nullptr, nullptr);
+        json result;
+        result["cid"] = cid;
+
+        // Check file_chunks
+        std::vector<std::string> chunks;
+        const char* sql_chunks = "SELECT hash FROM file_chunks WHERE cid = ? ORDER BY chunk_index;";
+        sqlite3_stmt* stmt_chunks;
+        if (sqlite3_prepare_v2(db, sql_chunks, -1, &stmt_chunks, nullptr) == SQLITE_OK) {
+            sqlite3_bind_text(stmt_chunks, 1, cid.c_str(), -1, SQLITE_STATIC);
+            while (sqlite3_step(stmt_chunks) == SQLITE_ROW) {
+                const char* hash = reinterpret_cast<const char*>(sqlite3_column_text(stmt_chunks, 0));
+                chunks.push_back(hash ? hash : "");
+            }
+            sqlite3_finalize(stmt_chunks);
+        } else {
+            WriteLog("Failed to prepare SELECT file_chunks for DEBUG CID: " + cid + ", error: " + sqlite3_errmsg(db));
+        }
+        result["file_chunks_found"] = !chunks.empty();
+        result["chunk_hashes"] = chunks;
+        WriteLog("DEBUG CID: " + cid + ", file_chunks found: " + std::to_string(chunks.size()));
+
+        // Check file_metadata
+        std::string filename = GetOriginalFilename(cid, db);
+        result["file_metadata_found"] = !filename.empty();
+        result["original_filename"] = filename;
+        WriteLog("DEBUG CID: " + cid + ", file_metadata found: " + (filename.empty() ? "false" : "true"));
+
+        sqlite3_close(db);
+        res.status = 200;
+        res.set_content(result.dump(), "application/json");
+    });
+    
+    server.Delete("/file/:cid", [](const httplib::Request& req, httplib::Response& res) {
+        std::string cid = trim(req.path_params.at("cid"));
+        WriteLog("Received DELETE request for CID: " + cid + ", hex: " + stringToHex(cid));
+        
+        sqlite3* db = nullptr;
+        if (sqlite3_open(DB_PATH.c_str(), &db) != SQLITE_OK) {
+            WriteLog("Failed to open database for DELETE CID: " + cid);
+            res.status = 500;
+            res.set_content("Database error", "text/plain");
+            return;
+        }
+
+        if (sqlite3_exec(db, "BEGIN;", nullptr, nullptr, nullptr) != SQLITE_OK) {
+            WriteLog("Failed to begin transaction for DELETE CID: " + cid);
+            sqlite3_close(db);
+            res.status = 500;
+            res.set_content("Transaction begin failed", "text/plain");
+            return;
+        }
+
+        // Check file_metadata for debugging
+        std::string filename = GetOriginalFilename(cid, db);
+        WriteLog("DELETE CID: " + cid + ", file_metadata found: " + (filename.empty() ? "false" : "true") + ", filename: " + filename);
 
         std::vector<std::string> chunks;
         const char* sql_select_chunks = "SELECT hash FROM file_chunks WHERE cid = ?;";
         sqlite3_stmt* stmt_select_chunks;
-        if (sqlite3_prepare_v2(db, sql_select_chunks, -1, &stmt_select_chunks, nullptr) == SQLITE_OK) {
-            sqlite3_bind_text(stmt_select_chunks, 1, cid.c_str(), -1, SQLITE_STATIC);
-            while (sqlite3_step(stmt_select_chunks) == SQLITE_ROW) {
-                const char* hash = reinterpret_cast<const char*>(sqlite3_column_text(stmt_select_chunks, 0));
-                chunks.push_back(hash);
-            }
-            sqlite3_finalize(stmt_select_chunks);
+        if (sqlite3_prepare_v2(db, sql_select_chunks, -1, &stmt_select_chunks, nullptr) != SQLITE_OK) {
+            WriteLog("Failed to prepare SELECT chunks for CID: " + cid + ", error: " + sqlite3_errmsg(db));
+            sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
+            sqlite3_close(db);
+            res.status = 500;
+            res.set_content("Database query preparation failed", "text/plain");
+            return;
         }
-
+        
+        sqlite3_bind_text(stmt_select_chunks, 1, cid.c_str(), -1, SQLITE_STATIC);
+        while (sqlite3_step(stmt_select_chunks) == SQLITE_ROW) {
+            const char* hash = reinterpret_cast<const char*>(sqlite3_column_text(stmt_select_chunks, 0));
+            chunks.push_back(hash ? hash : "");
+        }
+        sqlite3_finalize(stmt_select_chunks);
+        
         if (chunks.empty()) {
+            WriteLog("No chunks found for CID: " + cid);
             sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
             sqlite3_close(db);
             res.status = 404;
             res.set_content("File not found", "text/plain");
             return;
         }
+        WriteLog("Found " + std::to_string(chunks.size()) + " chunks for CID: " + cid);
 
         const char* sql_delete_chunks = "DELETE FROM file_chunks WHERE cid = ?;";
         sqlite3_stmt* stmt_delete_chunks;
-        if (sqlite3_prepare_v2(db, sql_delete_chunks, -1, &stmt_delete_chunks, nullptr) == SQLITE_OK) {
-            sqlite3_bind_text(stmt_delete_chunks, 1, cid.c_str(), -1, SQLITE_STATIC);
-            sqlite3_step(stmt_delete_chunks);
-            sqlite3_finalize(stmt_delete_chunks);
+        if (sqlite3_prepare_v2(db, sql_delete_chunks, -1, &stmt_delete_chunks, nullptr) != SQLITE_OK) {
+            WriteLog("Failed to prepare DELETE file_chunks for CID: " + cid + ", error: " + sqlite3_errmsg(db));
+            sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
+            sqlite3_close(db);
+            res.status = 500;
+            res.set_content("Failed to prepare chunk deletion", "text/plain");
+            return;
         }
+        sqlite3_bind_text(stmt_delete_chunks, 1, cid.c_str(), -1, SQLITE_STATIC);
+        if (sqlite3_step(stmt_delete_chunks) != SQLITE_DONE) {
+            WriteLog("Failed to execute DELETE file_chunks for CID: " + cid + ", error: " + sqlite3_errmsg(db));
+            sqlite3_finalize(stmt_delete_chunks);
+            sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
+            sqlite3_close(db);
+            res.status = 500;
+            res.set_content("Failed to delete chunks", "text/plain");
+            return;
+        }
+        sqlite3_finalize(stmt_delete_chunks);
+        WriteLog("Deleted file_chunks entries for CID: " + cid);
 
         const char* sql_delete_meta = "DELETE FROM file_metadata WHERE cid = ?;";
         sqlite3_stmt* stmt_delete_meta;
-        if (sqlite3_prepare_v2(db, sql_delete_meta, -1, &stmt_delete_meta, nullptr) == SQLITE_OK) {
-            sqlite3_bind_text(stmt_delete_meta, 1, cid.c_str(), -1, SQLITE_STATIC);
-            sqlite3_step(stmt_delete_meta);
-            sqlite3_finalize(stmt_delete_meta);
+        if (sqlite3_prepare_v2(db, sql_delete_meta, -1, &stmt_delete_meta, nullptr) != SQLITE_OK) {
+            WriteLog("Failed to prepare DELETE file_metadata for CID: " + cid + ", error: " + sqlite3_errmsg(db));
+            sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
+            sqlite3_close(db);
+            res.status = 500;
+            res.set_content("Failed to prepare metadata deletion", "text/plain");
+            return;
         }
+        sqlite3_bind_text(stmt_delete_meta, 1, cid.c_str(), -1, SQLITE_STATIC);
+        if (sqlite3_step(stmt_delete_meta) != SQLITE_DONE) {
+            WriteLog("Failed to execute DELETE file_metadata for CID: " + cid + ", error: " + sqlite3_errmsg(db));
+            sqlite3_finalize(stmt_delete_meta);
+            sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
+            sqlite3_close(db);
+            res.status = 500;
+            res.set_content("Failed to delete metadata", "text/plain");
+            return;
+        }
+        sqlite3_finalize(stmt_delete_meta);
+        WriteLog("Deleted file_metadata entry for CID: " + cid);
 
         for (const auto& hash : chunks) {
             const char* sql_decrement = "UPDATE chunk_references SET ref_count = ref_count - 1 WHERE hash = ?;";
             sqlite3_stmt* stmt_decrement;
-            if (sqlite3_prepare_v2(db, sql_decrement, -1, &stmt_decrement, nullptr) == SQLITE_OK) {
-                sqlite3_bind_text(stmt_decrement, 1, hash.c_str(), -1, SQLITE_STATIC);
-                sqlite3_step(stmt_decrement);
-                sqlite3_finalize(stmt_decrement);
+            if (sqlite3_prepare_v2(db, sql_decrement, -1, &stmt_decrement, nullptr) != SQLITE_OK) {
+                WriteLog("Failed to prepare UPDATE ref_count for hash: " + hash + ", error: " + sqlite3_errmsg(db));
+                sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
+                sqlite3_close(db);
+                res.status = 500;
+                res.set_content("Failed to prepare ref_count update", "text/plain");
+                return;
             }
+            sqlite3_bind_text(stmt_decrement, 1, hash.c_str(), -1, SQLITE_STATIC);
+            if (sqlite3_step(stmt_decrement) != SQLITE_DONE) {
+                WriteLog("Failed to execute UPDATE ref_count for hash: " + hash + ", error: " + sqlite3_errmsg(db));
+                sqlite3_finalize(stmt_decrement);
+                sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
+                sqlite3_close(db);
+                res.status = 500;
+                res.set_content("Failed to update ref_count", "text/plain");
+                return;
+            }
+            sqlite3_finalize(stmt_decrement);
+            WriteLog("Decremented ref_count for hash: " + hash);
 
             int ref_count = 0;
             const char* sql_select_ref = "SELECT ref_count FROM chunk_references WHERE hash = ?;";
             sqlite3_stmt* stmt_select_ref;
-            if (sqlite3_prepare_v2(db, sql_select_ref, -1, &stmt_select_ref, nullptr) == SQLITE_OK) {
-                sqlite3_bind_text(stmt_select_ref, 1, hash.c_str(), -1, SQLITE_STATIC);
-                if (sqlite3_step(stmt_select_ref) == SQLITE_ROW) {
-                    ref_count = sqlite3_column_int(stmt_select_ref, 0);
-                }
-                sqlite3_finalize(stmt_select_ref);
+            if (sqlite3_prepare_v2(db, sql_select_ref, -1, &stmt_select_ref, nullptr) != SQLITE_OK) {
+                WriteLog("Failed to prepare SELECT ref_count for hash: " + hash + ", error: " + sqlite3_errmsg(db));
+                sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
+                sqlite3_close(db);
+                res.status = 500;
+                res.set_content("Failed to prepare ref_count query", "text/plain");
+                return;
             }
+            sqlite3_bind_text(stmt_select_ref, 1, hash.c_str(), -1, SQLITE_STATIC);
+            if (sqlite3_step(stmt_select_ref) == SQLITE_ROW) {
+                ref_count = sqlite3_column_int(stmt_select_ref, 0);
+            } else {
+                WriteLog("No ref_count found for hash: " + hash);
+            }
+            sqlite3_finalize(stmt_select_ref);
 
             if (ref_count <= 0) {
                 std::string path = CHUNK_DIR + "/" + hash + ".bin";
-                fs::remove(path);
+                try {
+                    if (fs::exists(path)) {
+                        fs::remove(path);
+                        WriteLog("Removed chunk file: " + path);
+                    } else {
+                        WriteLog("Chunk file not found for deletion: " + path);
+                    }
+                } catch (const fs::filesystem_error& e) {
+                    WriteLog("Failed to remove chunk file: " + path + ", error: " + e.what());
+                    sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
+                    sqlite3_close(db);
+                    res.status = 500;
+                    res.set_content("Failed to delete chunk file: " + hash, "text/plain");
+                    return;
+                }
+
                 const char* sql_delete_chunk = "DELETE FROM chunk_references WHERE hash = ?;";
                 sqlite3_stmt* stmt_delete_chunk;
-                if (sqlite3_prepare_v2(db, sql_delete_chunk, -1, &stmt_delete_chunk, nullptr) == SQLITE_OK) {
-                    sqlite3_bind_text(stmt_delete_chunk, 1, hash.c_str(), -1, SQLITE_STATIC);
-                    sqlite3_step(stmt_delete_chunk);
-                    sqlite3_finalize(stmt_delete_chunk);
+                if (sqlite3_prepare_v2(db, sql_delete_chunk, -1, &stmt_delete_chunk, nullptr) != SQLITE_OK) {
+                    WriteLog("Failed to prepare DELETE chunk_references for hash: " + hash + ", error: " + sqlite3_errmsg(db));
+                    sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
+                    sqlite3_close(db);
+                    res.status = 500;
+                    res.set_content("Failed to prepare chunk reference deletion", "text/plain");
+                    return;
                 }
+                sqlite3_bind_text(stmt_delete_chunk, 1, hash.c_str(), -1, SQLITE_STATIC);
+                if (sqlite3_step(stmt_delete_chunk) != SQLITE_DONE) {
+                    WriteLog("Failed to execute DELETE chunk_references for hash: " + hash + ", error: " + sqlite3_errmsg(db));
+                    sqlite3_finalize(stmt_delete_chunk);
+                    sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
+                    sqlite3_close(db);
+                    res.status = 500;
+                    res.set_content("Failed to delete chunk reference", "text/plain");
+                    return;
+                }
+                sqlite3_finalize(stmt_delete_chunk);
+                WriteLog("Deleted chunk_references entry for hash: " + hash);
             }
         }
 
-        sqlite3_exec(db, "COMMIT;", nullptr, nullptr, nullptr);
-        sqlite3_close(db);
+        if (sqlite3_exec(db, "COMMIT;", nullptr, nullptr, nullptr) != SQLITE_OK) {
+            WriteLog("Failed to commit transaction for DELETE CID: " + cid + ", error: " + sqlite3_errmsg(db));
+            sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
+            sqlite3_close(db);
+            res.status = 500;
+            res.set_content("Transaction commit failed", "text/plain");
+            return;
+        }
+        WriteLog("Committed transaction for DELETE CID: " + cid);
 
+        sqlite3_close(db);
+        WriteLog("Successfully deleted CID: " + cid);
         res.status = 200;
         res.set_content("Deleted", "text/plain");
     });
