@@ -1,0 +1,10 @@
+^C:\USERS\TRAINING\DESKTOP\PROJECTROOT\BENCHMARK\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Training/Desktop/ProjectRoot/benchmark -BC:/Users/Training/Desktop/ProjectRoot/benchmark/build --check-stamp-file C:/Users/Training/Desktop/ProjectRoot/benchmark/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

@@ -1,0 +1,10 @@
+^C:\USERS\TRAINING\DESKTOP\PROJECTROOT\BENCHMARK\BUILD\CMAKEFILES\80B9CA9CC0DF02D7F73D32D7B79747AD\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Training/Desktop/ProjectRoot/benchmark -BC:/Users/Training/Desktop/ProjectRoot/benchmark/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/Training/Desktop/ProjectRoot/benchmark/build/ServiceBenchmarks.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
