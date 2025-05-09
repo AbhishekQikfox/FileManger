@@ -8,17 +8,18 @@
 #include <stdexcept>
 #include <sqlite3.h>
 #include <filesystem>
+#include <iostream>
+#include <chrono>
 
 namespace fs = std::filesystem;
 
 const std::string SERVICE_HOST = "127.0.0.1";
-const int SERVICE_PORT = 8080; // Frontend service port
+const int SERVICE_PORT = 8080;
 const std::string TEST_FILENAME = "testfile.bin";
 const std::string DB_PATH = "C:/Users/Training/Desktop/ProjectRoot/BackendService/chunks.db";
 const std::string CHUNK_DIR = "C:/Users/Training/Desktop/ProjectRoot/BackendService/Chunks";
 const std::vector<size_t> FILE_SIZES = {1024 * 1024, 5 * 1024 * 1024, 10 * 1024 * 1024}; // 1MB, 5MB, 10MB
 
-// Generate random file data of specified size
 std::string generate_file_data(size_t size) {
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -30,7 +31,6 @@ std::string generate_file_data(size_t size) {
     return data;
 }
 
-// Setup function to upload a test file and return its CID
 std::string setup_test_file(size_t file_size, const std::string& filename_suffix = "") {
     httplib::SSLClient cli(SERVICE_HOST, SERVICE_PORT);
     cli.enable_server_certificate_verification(false);
@@ -45,20 +45,19 @@ std::string setup_test_file(size_t file_size, const std::string& filename_suffix
         throw std::runtime_error("Failed to setup test file: Status " + 
             (res ? std::to_string(res->status) + ", Body: " + res->body : "no response"));
     }
-    return res->body; // Returns the CID
+    return res->body;
 }
 
-// Clean up database and chunk files
 void cleanup_benchmark_data() {
-    // Open SQLite database
+    std::cout << "Starting database cleanup...\n";
+
     sqlite3* db;
     if (sqlite3_open(DB_PATH.c_str(), &db) != SQLITE_OK) {
-        std::cerr << "Failed to open database for cleanup: " << sqlite3_errmsg(db) << std::endl;
+        std::cerr << "Failed to open database: " << sqlite3_errmsg(db) << "\n";
         sqlite3_close(db);
         return;
     }
 
-    // Delete entries from file_chunks, file_metadata, chunk_references
     const char* queries[] = {
         "DELETE FROM file_chunks WHERE cid LIKE 'benchmark_test_cid%';",
         "DELETE FROM file_metadata WHERE cid LIKE 'benchmark_test_cid%';",
@@ -69,124 +68,125 @@ void cleanup_benchmark_data() {
     for (const char* query : queries) {
         char* err_msg = nullptr;
         if (sqlite3_exec(db, query, nullptr, nullptr, &err_msg) != SQLITE_OK) {
-            std::cerr << "Failed to execute cleanup query: " << err_msg << std::endl;
+            std::cerr << "Failed to execute query: " << err_msg << "\n";
             sqlite3_free(err_msg);
+        } else {
+            std::cout << "Executed: " << query << "\n";
         }
     }
 
     sqlite3_close(db);
 
-    // Delete chunk files
     try {
         for (const auto& entry : fs::directory_iterator(CHUNK_DIR)) {
             if (entry.path().filename().string().find("chunk_") == 0) {
                 fs::remove(entry.path());
+                std::cout << "Deleted: " << entry.path() << "\n";
             }
         }
     } catch (const std::exception& e) {
-        std::cerr << "Failed to clean up chunk files: " << e.what() << std::endl;
+        std::cerr << "Failed to clean chunk files: " << e.what() << "\n";
     }
 }
 
-// Benchmark for POST /upload
 static void BM_Upload(benchmark::State& state) {
     httplib::SSLClient cli(SERVICE_HOST, SERVICE_PORT);
     cli.enable_server_certificate_verification(false);
     size_t file_size = FILE_SIZES[state.range(0)];
     std::string file_data = generate_file_data(file_size);
-    static int counter = 0; // For unique CIDs
+    static int counter = 0;
+    double total_time = 0.0;
 
     for (auto _ : state) {
+        auto start = std::chrono::high_resolution_clock::now();
         httplib::MultipartFormDataItems items = {
             {"file", file_data, TEST_FILENAME + std::to_string(counter++), "application/octet-stream"}
         };
-
         auto res = cli.Post("/upload", items);
+        auto end = std::chrono::high_resolution_clock::now();
+        total_time += std::chrono::duration<double, std::milli>(end - start).count();
+
         std::string cid = res && res->status == 200 ? res->body : "N/A";
         if (res) {
-            state.SetLabel("Status: " + std::to_string(res->status) + ", CID: " + cid + 
-                (res->status != 200 ? ", Error: " + res->body : ""));
-        } else {
-            state.SetLabel("Request failed, CID: " + cid);
+            double avg_time = total_time / state.iterations();
+            state.SetLabel("Status: " + std::to_string(res->status) + ", CID: " + cid +
+                ", Avg Time: " + std::to_string(avg_time) + " ms, Total Time: " + std::to_string(total_time) + " ms");
         }
     }
 }
 
-// Benchmark for GET /files/:cid
 static void BM_GetFile(benchmark::State& state) {
     httplib::SSLClient cli(SERVICE_HOST, SERVICE_PORT);
     cli.enable_server_certificate_verification(false);
     size_t file_size = FILE_SIZES[state.range(0)];
     std::string cid = setup_test_file(file_size);
+    double total_time = 0.0;
 
     for (auto _ : state) {
+        auto start = std::chrono::high_resolution_clock::now();
         auto res = cli.Get("/files/" + cid);
+        auto end = std::chrono::high_resolution_clock::now();
+        total_time += std::chrono::duration<double, std::milli>(end - start).count();
+
         if (res) {
-            state.SetLabel("Status: " + std::to_string(res->status) + ", CID: " + cid + 
-                (res->status != 200 ? ", Error: " + res->body : ""));
-        } else {
-            state.SetLabel("Request failed, CID: " + cid);
+            double avg_time = total_time / state.iterations();
+            state.SetLabel("Status: " + std::to_string(res->status) + ", CID: " + cid +
+                ", Avg Time: " + std::to_string(avg_time) + " ms, Total Time: " + std::to_string(total_time) + " ms");
         }
     }
 }
 
-// Benchmark for PUT /update/:cid
 static void BM_Update(benchmark::State& state) {
     httplib::SSLClient cli(SERVICE_HOST, SERVICE_PORT);
     cli.enable_server_certificate_verification(false);
     size_t file_size = FILE_SIZES[state.range(0)];
     std::string current_cid = setup_test_file(file_size, "_initial");
+    double total_time = 0.0;
 
     for (auto _ : state) {
         std::string new_file_data = generate_file_data(file_size);
         httplib::MultipartFormDataItems items = {
             {"file", new_file_data, TEST_FILENAME, "application/octet-stream"}
         };
-
+        auto start = std::chrono::high_resolution_clock::now();
         auto res = cli.Put("/update/" + current_cid, items);
+        auto end = std::chrono::high_resolution_clock::now();
+        total_time += std::chrono::duration<double, std::milli>(end - start).count();
+
         if (res && res->status == 200) {
-            current_cid = res->body; // Update to new_cid for next iteration
-            state.SetLabel("Status: 200, Old CID: " + current_cid + ", New CID: " + res->body);
-        } else {
-            std::string error = res ? ", Error: " + res->body : "";
-            state.SetLabel("Status: " + std::to_string(res ? res->status : 0) + 
-                ", Old CID: " + current_cid + ", New CID: N/A" + error);
+            double avg_time = total_time / state.iterations();
+            state.SetLabel("Status: 200, Old CID: " + current_cid + ", New CID: " + res->body +
+                ", Avg Time: " + std::to_string(avg_time) + " ms, Total Time: " + std::to_string(total_time) + " ms");
+            current_cid = res->body;
         }
     }
 }
 
-// Benchmark for DELETE /files/:cid
 static void BM_Delete(benchmark::State& state) {
     httplib::SSLClient cli(SERVICE_HOST, SERVICE_PORT);
     cli.enable_server_certificate_verification(false);
     size_t file_size = FILE_SIZES[state.range(0)];
+    double total_time = 0.0;
 
     for (auto _ : state) {
         std::string cid = setup_test_file(file_size, "_" + std::to_string(state.iterations()));
+        auto start = std::chrono::high_resolution_clock::now();
         auto res = cli.Delete("/files/" + cid);
+        auto end = std::chrono::high_resolution_clock::now();
+        total_time += std::chrono::duration<double, std::milli>(end - start).count();
+
         if (res) {
-            state.SetLabel("Status: " + std::to_string(res->status) + ", CID: " + cid + 
-                (res->status != 200 ? ", Error: " + res->body : ""));
-        } else {
-            state.SetLabel("Request failed, CID: " + cid);
+            double avg_time = total_time / state.iterations();
+            state.SetLabel("Status: " + std::to_string(res->status) + ", CID: " + cid +
+                ", Avg Time: " + std::to_string(avg_time) + " ms, Total Time: " + std::to_string(total_time) + " ms");
         }
     }
 }
 
-// Custom argument names for file sizes
-static void CustomArguments(benchmark::internal::Benchmark* b) {
-    b->ArgNames({"FileSize"});
-    b->Arg(0)->Arg(1)->Arg(2);
-    b->ArgName("1MB")->Arg(0);
-    b->ArgName("5MB")->Arg(1);
-    b->ArgName("10MB")->Arg(2);
-}
-
-// Register benchmarks
-BENCHMARK(BM_Upload)->Apply(CustomArguments)->Iterations(50)->Unit(benchmark::kMillisecond);
-BENCHMARK(BM_GetFile)->Apply(CustomArguments)->Iterations(50)->Unit(benchmark::kMillisecond);
-BENCHMARK(BM_Update)->Apply(CustomArguments)->Iterations(50)->Unit(benchmark::kMillisecond);
-BENCHMARK(BM_Delete)->Apply(CustomArguments)->Iterations(50)->Unit(benchmark::kMillisecond);
+BENCHMARK(BM_Upload)->Args({0})->Args({1})->Args({2})->Iterations(50)->Unit(benchmark::kMillisecond);
+BENCHMARK(BM_GetFile)->Args({0})->Args({1})->Args({2})->Iterations(50)->Unit(benchmark::kMillisecond);
+BENCHMARK(BM_Update)->Args({0})->Args({1})->Args({2})->Iterations(50)->Unit(benchmark::kMillisecond);
+BENCHMARK(BM_Delete)->Args({0})->Args({1})->Args({2})->Iterations(50)->Unit(benchmark::kMillisecond);
 
 int main(int argc, char** argv) {
     benchmark::Initialize(&argc, argv);
