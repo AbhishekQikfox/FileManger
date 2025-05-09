@@ -1,0 +1,5 @@
+C:/Users/Training/Desktop/ProjectRoot/Tests/build/CMakeFiles/frontend_tests.dir
+C:/Users/Training/Desktop/ProjectRoot/Tests/build/CMakeFiles/backend_tests.dir
+C:/Users/Training/Desktop/ProjectRoot/Tests/build/CMakeFiles/RUN_TESTS.dir
+C:/Users/Training/Desktop/ProjectRoot/Tests/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/Training/Desktop/ProjectRoot/Tests/build/CMakeFiles/ZERO_CHECK.dir

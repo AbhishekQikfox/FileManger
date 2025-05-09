@@ -1,0 +1,36 @@
+# CMake generated Testfile for 
+# Source directory: C:/Users/Training/Desktop/ProjectRoot/Tests
+# Build directory: C:/Users/Training/Desktop/ProjectRoot/Tests/build
+# 
+# This file includes the relevant testing commands required for 
+# testing this directory and lists subdirectories to be tested as well.
+if(CTEST_CONFIGURATION_TYPE MATCHES "^([Dd][Ee][Bb][Uu][Gg])$")
+  add_test(FE "C:/Users/Training/Desktop/ProjectRoot/Tests/build/Debug/frontend_tests.exe")
+  set_tests_properties(FE PROPERTIES  _BACKTRACE_TRIPLES "C:/Users/Training/Desktop/ProjectRoot/Tests/CMakeLists.txt;38;add_test;C:/Users/Training/Desktop/ProjectRoot/Tests/CMakeLists.txt;0;")
+elseif(CTEST_CONFIGURATION_TYPE MATCHES "^([Rr][Ee][Ll][Ee][Aa][Ss][Ee])$")
+  add_test(FE "C:/Users/Training/Desktop/ProjectRoot/Tests/build/Release/frontend_tests.exe")
+  set_tests_properties(FE PROPERTIES  _BACKTRACE_TRIPLES "C:/Users/Training/Desktop/ProjectRoot/Tests/CMakeLists.txt;38;add_test;C:/Users/Training/Desktop/ProjectRoot/Tests/CMakeLists.txt;0;")
+elseif(CTEST_CONFIGURATION_TYPE MATCHES "^([Mm][Ii][Nn][Ss][Ii][Zz][Ee][Rr][Ee][Ll])$")
+  add_test(FE "C:/Users/Training/Desktop/ProjectRoot/Tests/build/MinSizeRel/frontend_tests.exe")
+  set_tests_properties(FE PROPERTIES  _BACKTRACE_TRIPLES "C:/Users/Training/Desktop/ProjectRoot/Tests/CMakeLists.txt;38;add_test;C:/Users/Training/Desktop/ProjectRoot/Tests/CMakeLists.txt;0;")
+elseif(CTEST_CONFIGURATION_TYPE MATCHES "^([Rr][Ee][Ll][Ww][Ii][Tt][Hh][Dd][Ee][Bb][Ii][Nn][Ff][Oo])$")
+  add_test(FE "C:/Users/Training/Desktop/ProjectRoot/Tests/build/RelWithDebInfo/frontend_tests.exe")
+  set_tests_properties(FE PROPERTIES  _BACKTRACE_TRIPLES "C:/Users/Training/Desktop/ProjectRoot/Tests/CMakeLists.txt;38;add_test;C:/Users/Training/Desktop/ProjectRoot/Tests/CMakeLists.txt;0;")
+else()
+  add_test(FE NOT_AVAILABLE)
+endif()
+if(CTEST_CONFIGURATION_TYPE MATCHES "^([Dd][Ee][Bb][Uu][Gg])$")
+  add_test(BE "C:/Users/Training/Desktop/ProjectRoot/Tests/build/Debug/backend_tests.exe")
+  set_tests_properties(BE PROPERTIES  _BACKTRACE_TRIPLES "C:/Users/Training/Desktop/ProjectRoot/Tests/CMakeLists.txt;39;add_test;C:/Users/Training/Desktop/ProjectRoot/Tests/CMakeLists.txt;0;")
+elseif(CTEST_CONFIGURATION_TYPE MATCHES "^([Rr][Ee][Ll][Ee][Aa][Ss][Ee])$")
+  add_test(BE "C:/Users/Training/Desktop/ProjectRoot/Tests/build/Release/backend_tests.exe")
+  set_tests_properties(BE PROPERTIES  _BACKTRACE_TRIPLES "C:/Users/Training/Desktop/ProjectRoot/Tests/CMakeLists.txt;39;add_test;C:/Users/Training/Desktop/ProjectRoot/Tests/CMakeLists.txt;0;")
+elseif(CTEST_CONFIGURATION_TYPE MATCHES "^([Mm][Ii][Nn][Ss][Ii][Zz][Ee][Rr][Ee][Ll])$")
+  add_test(BE "C:/Users/Training/Desktop/ProjectRoot/Tests/build/MinSizeRel/backend_tests.exe")
+  set_tests_properties(BE PROPERTIES  _BACKTRACE_TRIPLES "C:/Users/Training/Desktop/ProjectRoot/Tests/CMakeLists.txt;39;add_test;C:/Users/Training/Desktop/ProjectRoot/Tests/CMakeLists.txt;0;")
+elseif(CTEST_CONFIGURATION_TYPE MATCHES "^([Rr][Ee][Ll][Ww][Ii][Tt][Hh][Dd][Ee][Bb][Ii][Nn][Ff][Oo])$")
+  add_test(BE "C:/Users/Training/Desktop/ProjectRoot/Tests/build/RelWithDebInfo/backend_tests.exe")
+  set_tests_properties(BE PROPERTIES  _BACKTRACE_TRIPLES "C:/Users/Training/Desktop/ProjectRoot/Tests/CMakeLists.txt;39;add_test;C:/Users/Training/Desktop/ProjectRoot/Tests/CMakeLists.txt;0;")
+else()
+  add_test(BE NOT_AVAILABLE)
+endif()

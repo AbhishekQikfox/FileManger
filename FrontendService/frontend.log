@@ -1,2 +1,5 @@
 2025-05-08 15:29:09.665 - Frontend service starting with config: {"backend_host":"127.0.0.1","backend_port":8081,"chunk_size":1048576,"log_file":"C:\\Users\\Training\\Desktop\\ProjectRoot\\FrontendService\\frontend.log","server_port":8080}
 2025-05-08 15:29:09.676 - Server started on port 8080 with HTTPS
+2025-05-08 17:48:54.897 - Frontend service starting with config: {"backend_host":"127.0.0.1","backend_port":8081,"chunk_size":1048576,"log_file":"C:\\Users\\Training\\Desktop\\ProjectRoot\\FrontendService\\frontend.log","server_port":8080}
+2025-05-08 17:48:54.916 - Server started on port 8080 with HTTPS
+2025-05-08 17:51:10.494 - Server stopped
