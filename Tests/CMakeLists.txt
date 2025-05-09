@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(GTest CONFIG REQUIRED)
-find_package(OpenSSL REQUIRED)
+find_package (OpenSSL REQUIRED)
 find_package(SQLite3 REQUIRED)
 
 # front-end utils
@@ -34,6 +34,17 @@ target_link_libraries(backend_tests
     GTest::gtest_main
 )
 
+# integration tests
+add_executable(integration_tests integration_test.cpp)
+target_link_libraries(integration_tests
+  PRIVATE
+    frontend_utils
+    backend_utils
+    GTest::gtest_main
+    OpenSSL::SSL
+)
+
 enable_testing()
 add_test(NAME FE COMMAND frontend_tests)
 add_test(NAME BE COMMAND backend_tests)
+add_test(NAME IT COMMAND integration_tests)

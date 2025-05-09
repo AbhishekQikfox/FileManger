@@ -11,6 +11,9 @@
       <FullPath>C:\Users\Training\Desktop\ProjectRoot\Tests\build\Release\frontend_tests.exe</FullPath>
     </ProjectOutput>
     <ProjectOutput>
+      <FullPath>C:\Users\Training\Desktop\ProjectRoot\Tests\build\Release\integration_tests.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
       <FullPath>C:\Users\Training\Desktop\ProjectRoot\Tests\build\x64\Release\ALL_BUILD</FullPath>
     </ProjectOutput>
   </ProjectOutputs>

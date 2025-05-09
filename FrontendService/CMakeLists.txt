@@ -1,30 +1,49 @@
-cmake_minimum_required(VERSION 3.15)
-project(FrontendService)
+cmake_minimum_required(VERSION 3.16)
+project(FullUnitTests)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Required packages
+find_package(GTest CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
-find_package(nlohmann_json CONFIG REQUIRED)
-find_package(Threads REQUIRED)
+find_package(SQLite3 REQUIRED)
 
-# Main executable
-add_executable(${PROJECT_NAME}
-    FrontendService.cpp
+# front-end utils
+add_library(frontend_utils INTERFACE)
+target_include_directories(frontend_utils INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(frontend_utils INTERFACE OpenSSL::Crypto)
+
+# back-end utils
+add_library(backend_utils INTERFACE)
+target_include_directories(backend_utils INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(backend_utils INTERFACE SQLite::SQLite3 OpenSSL::Crypto)
+
+# front-end tests
+add_executable(frontend_tests test_frontend.cpp)
+target_link_libraries(frontend_tests
+  PRIVATE
+    frontend_utils
+    GTest::gtest_main
 )
 
-# Include directories
-target_include_directories(${PROJECT_NAME} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}
+# back-end tests
+add_executable(backend_tests test_backend.cpp)
+target_link_libraries(backend_tests
+  PRIVATE
+    backend_utils
+    GTest::gtest_main
 )
 
-# Link necessary libraries
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    OpenSSL::SSL
+# integration tests
+add_executable(integration_tests integration_tests.cpp)
+target_link_libraries(integration_tests
+  PRIVATE
+    frontend_utils
+    GTest::gtest_main
     OpenSSL::Crypto
-    nlohmann_json::nlohmann_json
-    Threads::Threads
-    advapi32
-    ws2_32
 )
+
+enable_testing()
+add_test(NAME FE COMMAND frontend_tests)
+add_test(NAME BE COMMAND backend_tests)
+add_test(NAME INT COMMAND integration_tests)

@@ -59,3 +59,4 @@ inline std::string trim(const std::string& s) {
     auto l = s.find_last_not_of(" \t\n\r");
     return s.substr(f,l-f+1);
 }
+

@@ -182,6 +182,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <Project>{9854733D-9DAC-3DC0-9E41-65023EF0CDFC}</Project>
       <Name>frontend_tests</Name>
     </ProjectReference>
+    <ProjectReference Include="C:\Users\Training\Desktop\ProjectRoot\Tests\build\integration_tests.vcxproj">
+      <Project>{2338E7FA-3248-3E49-8281-BDA9C07105D3}</Project>
+      <Name>integration_tests</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

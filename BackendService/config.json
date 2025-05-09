@@ -1,0 +1,12 @@
+{
+    "backend": {
+      "db_dir": "C:\\Users\\Training\\Desktop\\ProjectRoot\\BackendService",
+      "db_name": "chunks.db",
+      "chunk_dir_name": "Chunks",
+      "log_file_name": "backend.log",
+      "http_port": 8081,
+      "ssl_cert_path": "C:\\Users\\Training\\Desktop\\ProjectRoot\\cert.pem",
+      "ssl_key_path": "C:\\Users\\Training\\Desktop\\ProjectRoot\\key.pem",
+      "payload_max_length": 1048576000
+    }
+  }
